@@ -1,0 +1,25 @@
+*{
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+}
+
+body{
+   background-color: black;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+   height: 100vh;
+}
+
+canvas{
+   background-color: wheat;
+   height: 70%;
+}
+
+#controles{
+   height: 25%;
+   width: 100%;
+   background-color: white;
+}
