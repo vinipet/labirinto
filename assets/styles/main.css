@@ -21,13 +21,14 @@ canvas{
    image-rendering: pixelated;
    image-rendering: crisp-edges;
    image-rendering: -moz-crisp-edges;
+   border: 10px black solid;
 }
 
 #controles{
    margin: 4px;
-   height: 20%;
+   height: 30%;
    width: 100%;
-   background-color: white;
+   background-color: rgba(255, 255, 255, 0.243);
    position: fixed;
    bottom: 0;
 }

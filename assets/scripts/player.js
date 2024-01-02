@@ -6,7 +6,7 @@ const screen = canvaElement.getContext('2d')
 function createGame(){
    const state = {
       players: {
-         'player1': {x:1, y:1}
+         'player1': {x:0, y:12}
       },
       walls: {
          'wall1': {x:0, y:0, height: 1, width:25},
@@ -17,10 +17,14 @@ function createGame(){
          'wall6': {x:0, y:24, height: 1, width:25},
          'wall7': {x:0, y:13, height: 1, width:10},
          'wall8': {x:0, y:11, height: 1, width:10},
+      },
+      destiny: {
+         '1': {x:24, y:12, height:1, width:1}
       }
    }
    function movePlayer(command){
-      const acceptedMoves = {
+
+      const acceptedMovements = {
          ArrowUp(player){
             if(player.y-1 >=0){
                player.y = player.y-1
@@ -43,15 +47,14 @@ function createGame(){
          },
          
       }
-
       const keyPressed = command.keyPressed
       const player = state.players[command.playerId]
-      const moveFunction = acceptedMoves[keyPressed]
+      const moveFunction = acceptedMovements[keyPressed]
 
       if(moveFunction){
          moveFunction(player)
       }
-      return //temp
+     
    }
    
    return {
@@ -90,7 +93,7 @@ function createKeyboardListener(){
       notifyAll(command)
    }
    return {
-      subscribe
+      subscribe, notifyAll
    }
 }
 
@@ -108,6 +111,12 @@ function renderScreen() {
       const wall = game.state.walls[wallId]
       screen.fillStyle = 'black'
       screen.fillRect(wall.x, wall.y, wall.width, wall.height)
+   }
+   
+   for(const destinyId in game.state.destiny){
+      const destiny = game.state.destiny[destinyId]
+      screen.fillStyle = 'green'
+      screen.fillRect(destiny.x, destiny.y, destiny.width, destiny.height)
    }
    requestAnimationFrame(renderScreen)  
 }
