@@ -1,16 +1,16 @@
 export default function renderScreen(screen, game, requestAnimationFrame) {
-   screen.fillStyle = 'wheat'
+   screen.fillStyle = 'white'
    screen.clearRect(0,0,25,25)
    
    for(const playerId in game.state.players){
       const player = game.state.players[playerId]
-      screen.fillStyle = 'white'
+      screen.fillStyle = 'blue'
       screen.fillRect(player.x, player.y, 1, 1)
    }
 
    for(const wallId in game.state.walls){
       const wall = game.state.walls[wallId]
-      screen.fillStyle = 'black'
+      screen.fillStyle = 'white'
       screen.fillRect(wall.x, wall.y, wall.width, wall.height)
    }
    

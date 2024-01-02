@@ -15,13 +15,13 @@ body{
 
 canvas{
    margin: 10px;
-   background-color: wheat;
+   background-color: black;
    height: 500px;
    width: 500px;
    image-rendering: pixelated;
    image-rendering: crisp-edges;
    image-rendering: -moz-crisp-edges;
-   border: 10px black solid;
+   border: 10px white solid;
 }
 
 #controles{
