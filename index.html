@@ -11,7 +11,20 @@
    <div id="controles">
       
    </div>
-   
-   <script src="assets/scripts/player.js"></script>
+   <script type="module" >
+      import createKeyboardListener from './assets/scripts/keyboardListener.js'
+      import createGame from './assets/scripts/rules.js'
+      import renderScreen from './assets/scripts/render.js'
+
+      const canvaElement = document.getElementById('screen')
+      const screen = canvaElement.getContext('2d')
+      const game = createGame()
+      const keyboardListener = createKeyboardListener()
+      keyboardListener.subscribe(game.movePlayer)
+
+      renderScreen(screen,game,requestAnimationFrame)
+   </script>
+      
+   </script>
 </body>
 </html>
