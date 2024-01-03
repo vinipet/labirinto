@@ -57,10 +57,15 @@ export default function createGame(){
       movePlayer,
       state
    }
-}
-
-function wall(side){
-   for(const wall in game.state.walls){
-      return walls.side
+   
+   function wall(eixo,direcao){
+      const eixoPlayer = state.players.player1[eixo,direcao]
+      for (const wall in state.walls) {
+         const  wallCiclo = state.walls[wall]
+         if(wall[eixo] == eixoPlayer){
+            return false
+         }
+         
+      }
    }
 }
