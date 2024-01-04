@@ -11,7 +11,7 @@ export default function renderScreen(screen, game, requestAnimationFrame) {
    for(const wallId in game.state.walls){
       const wall = game.state.walls[wallId]
       screen.fillStyle = 'white'
-      screen.fillRect(wall.x, wall.y, wall.width, wall.height)
+      screen.fillRect(wall.x, wall.y, 1, 1)
    }
    
    for(const destinyId in game.state.destiny){
