@@ -1,7 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap');
 *{
    margin: 0;
    padding: 0;
    box-sizing: border-box;
+   font-family: Outfit;
+}
+html{
+   height: 100vh;
+   width: 100vw;
 }
 
 body{
@@ -11,6 +17,57 @@ body{
    align-items: center;
    height: 100vh;
    width: 100vw;
+   justify-content: center;
+   flex-wrap: wrap;
+}
+
+section{
+   display: flex;
+   flex-direction: row;
+   flex-wrap: wrap;
+   align-items: center;
+   background-color: rgb(125, 173, 119);
+   border: 5px solid rgb(55, 75, 51);
+   border-radius: 10px;
+   justify-content: center;
+}
+
+h1{
+   text-transform: uppercase;
+   text-overflow: ellipsis;
+   font-size: 7vw;
+   max-width: 300px;
+   font-size: 50px;
+   text-align: center;
+   display: block;
+}
+
+.mundos{
+   max-width: 700px;
+   margin: 50px;
+   display: grid;
+   grid-template-columns: 33% 33% 33%;
+}
+
+.mundo{
+   margin: 20px;
+   background-color: white;
+}
+
+a{
+   text-decoration: none;
+}
+
+p{
+   text-align: center;
+   color: black;
+   text-transform: uppercase;
+   font-weight: bold;
+}
+
+img{
+   
+   width: auto;
 }
 
 canvas{

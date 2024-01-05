@@ -1,30 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Labirinto</title>
    <link rel="stylesheet" href="assets/styles/main.css">
+   <title>Labirinto</title>
 </head>
 <body>
-   <canvas id="screen" width="25" height="25" ></canvas>
-   <div id="controles">
-      
-   </div>
-   <script type="module" >
-      import createKeyboardListener from './assets/scripts/keyboardListener.js'
-      import createGame from './assets/scripts/rules.js'
-      import renderScreen from './assets/scripts/render.js'
-
-      const canvaElement = document.getElementById('screen')
-      const screen = canvaElement.getContext('2d')
-      const game = createGame()
-      const keyboardListener = createKeyboardListener()
-      keyboardListener.subscribe(game.movePlayer)
-
-      renderScreen(screen,game,requestAnimationFrame)
-   </script>
-      
-   </script>
+   <section>
+      <h1>selecione o  Nivel</h1>
+      <div class="mundos">
+         <div class="mundo"><a href="firstWorld.html"><p>mundo 1</p> <img src="assets/img/download.png" alt="imagen do mundo"> </a></div>
+         <div class="mundo"><a href="firstWorld.html"><p>mundo 1</p> <img src="assets/img/download.png" alt="imagen do mundo"> </a></div>
+         <div class="mundo"><a href="firstWorld.html"><p>mundo 1</p> <img src="assets/img/download.png" alt="imagen do mundo"> </a></div>
+         <div class="mundo"><a href="firstWorld.html"><p>mundo 1</p> <img src="assets/img/download.png" alt="imagen do mundo"> </a></div>
+         <div class="mundo"><a href="firstWorld.html"><p>mundo 1</p> <img src="assets/img/download.png" alt="imagen do mundo"> </a></div>
+         <div class="mundo"><a href="firstWorld.html"><p>mundo 1</p> <img src="assets/img/download.png" alt="imagen do mundo"> </a></div>
+      </div>
+   </section>
 </body>
 </html>
