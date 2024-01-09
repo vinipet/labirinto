@@ -1,7 +1,6 @@
 export default function createGame(){
-   let pontos = 0
-   let ponto = document.getElementById('')
    const state = {
+      pontos: 0,
       screen:{width:25, height:25},
       players: {
          'player1': {x:0, y:0}
@@ -349,16 +348,17 @@ export default function createGame(){
          '26':{x:8, y:18},
          '27':{x:8, y:19},
          '28':{x:8, y:20},
+         '29':{x:5, y:0},
       },
       tp: {
-         '1': {x:24, y:0},
-         '2':{x:7, y:11},
-         '3':{x:11, y:11},
-         '4':{x:11, y:18},
-         '5':{x:16, y:16},
-         '6':{x:22, y:16},
-         '7':{x:19, y:17},
-         '8':{x:13, y:21},
+         '1':{x:24, y:0, destino:{x:16,y:15}},
+         '2':{x:7, y:11, destino:{x:19,y:18}},
+         '3':{x:11, y:11, destino:{x:10,y:18}},
+         '4':{x:11, y:18, destino:{x:12,y:11}},
+         '5':{x:16, y:16, destino:{x:23,y:0}},
+         '6':{x:22, y:16, destino:{x:14,y:21}},
+         '7':{x:19, y:17, destino:{x:6,y:11}},
+         '8':{x:13, y:21, destino:{x:22,y:15}},
       }
    }
    function movePlayer(command){
@@ -366,22 +366,22 @@ export default function createGame(){
       const acceptedMovements = {
          ArrowUp(player){
 
-            if(player.y-1 >=0 && wall(0,-1) && win(0,-1)&& coin(+1,0)){
+            if(player.y-1 >=0 && wall(0,-1) && win(0,-1)&& coin(0,-1) && tp(0,-1)){
                player.y = player.y-1
             }
          },
          ArrowRight(player){
-            if(player.x+1<state.screen.width && wall(+1,0) && win(+1,0) && coin(+1,0)){
+            if(player.x+1<state.screen.width && wall(+1,0) && win(+1,0) && coin(+1,0) && tp(+1,0)){
                player.x =player.x+1
             }
          },
          ArrowDown(player){
-            if(player.y+1<state.screen.height && wall(0,+1) && win(0,+1)&& coin(+1,0)){
+            if(player.y+1<state.screen.height && wall(0,+1) && win(0,+1)&& coin(0,+1) && tp(0,+1)){
                player.y=player.y+1
             }
          },
          ArrowLeft(player){
-            if(player.x-1>=0 && wall(-1,0) && win(-1,0)&& coin(+1,0)){
+            if(player.x-1>=0 && wall(-1,0) && win(-1,0)&& coin(-1,0) && tp(-1,0)){
                player.x=player.x-1
             }
          },
@@ -435,9 +435,24 @@ export default function createGame(){
       for(let coinNUm in state.coins){
          let coin = state.coins[coinNUm]
          if(posFutureX == coin.x && posFutureY == coin.y){ 
-            pontos ++
+            state.pontos ++
             coin.x = -1
             coin.y = -1
+         } else{}}
+      return result
+   }
+   function tp(commandX, commandY){
+      const playerPos = state.players.player1
+      const posFutureX = playerPos.x + commandX
+      const posFutureY = playerPos.y + commandY
+      let result = true
+
+      for(let tpId in state.tp){
+         let tp = state.tp[tpId]
+         if(posFutureX == tp.x && posFutureY == tp.y){ 
+            state.players.player1.x = tp.destino.x
+            state.players.player1.y = tp.destino.y
+            result = false
          } else{}}
       return result
    }

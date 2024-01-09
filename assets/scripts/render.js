@@ -1,4 +1,8 @@
 export default function renderScreen(screen, game, requestAnimationFrame) {
+
+   let ponto = document.getElementById('points')
+   ponto.innerHTML= `Você tem ${game.state.pontos} pontos`
+
    screen.fillStyle = 'white'
    screen.clearRect(0,0,25,25)
    
