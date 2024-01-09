@@ -17,7 +17,17 @@ export default function renderScreen(screen, game, requestAnimationFrame) {
    for(const destinyId in game.state.destiny){
       const destiny = game.state.destiny[destinyId]
       screen.fillStyle = 'green'
-      screen.fillRect(destiny.x, destiny.y, destiny.width, destiny.height)
+      screen.fillRect(destiny.x, destiny.y,1,1)
+   }
+   for(const coinId in game.state.coins){
+      const coin = game.state.coins[coinId]
+      screen.fillStyle = 'rgb(173, 173, 22)'
+      screen.fillRect(coin.x, coin.y,1,1)
+   }
+   for(const tpId in game.state.tp){
+      const tp = game.state.tp[tpId]
+      screen.fillStyle = 'brown'
+      screen.fillRect(tp.x, tp.y,1,1)
    }
    requestAnimationFrame(() => {
       renderScreen(screen, game, requestAnimationFrame)
