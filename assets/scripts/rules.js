@@ -7,6 +7,7 @@ export default function createGame(){
          'player1': {x:0, y:0}
       },
       walls: {
+
          'wall1': {x:0, y:1,},
          'wall2': {x:13, y:0,},
          'wall3': {x:14, y:0,},
@@ -314,6 +315,7 @@ export default function createGame(){
 'wall305':{x:21, y:23},
 'wall306':{x:22, y:22},
 'wall307':{x:22, y:23},
+
       },
       destiny: {
          '1': {x:24, y:24,},
@@ -363,6 +365,7 @@ export default function createGame(){
 
       const acceptedMovements = {
          ArrowUp(player){
+
             if(player.y-1 >=0 && wall(0,-1) && win(0,-1)&& coin(+1,0)){
                player.y = player.y-1
             }
@@ -412,7 +415,6 @@ export default function createGame(){
          } else{}}
       return result
    }
-
    function win(commandX, commandY){
       const playerPos = state.players.player1
       const posFutureX = playerPos.x + commandX
