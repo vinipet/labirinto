@@ -89,3 +89,9 @@ canvas{
    position: fixed;
    bottom: 0;
 }
+
+#pontos{
+   position: fixed;
+   top: 15;
+   left: 15;
+}
