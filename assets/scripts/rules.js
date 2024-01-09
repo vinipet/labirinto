@@ -1,5 +1,6 @@
 export default function createGame(){
-   let contador = 275
+   let pontos = 0
+   let ponto = document.getElementById('')
    const state = {
       screen:{width:25, height:25},
       players: {
@@ -362,29 +363,26 @@ export default function createGame(){
 
       const acceptedMovements = {
          ArrowUp(player){
-            if(player.y-1 >=0 && wall(0,-1) && win(0,-1)){
+            if(player.y-1 >=0 && wall(0,-1) && win(0,-1)&& coin(+1,0)){
                player.y = player.y-1
             }
          },
          ArrowRight(player){
-            if(player.x+1<state.screen.width && wall(+1,0) && win(+1,0)){
+            if(player.x+1<state.screen.width && wall(+1,0) && win(+1,0) && coin(+1,0)){
                player.x =player.x+1
             }
          },
          ArrowDown(player){
-            if(player.y+1<state.screen.height && wall(0,+1) && win(0,+1)){
+            if(player.y+1<state.screen.height && wall(0,+1) && win(0,+1)&& coin(+1,0)){
                player.y=player.y+1
             }
          },
          ArrowLeft(player){
-            if(player.x-1>=0 && wall(-1,0) && win(-1,0)){
+            if(player.x-1>=0 && wall(-1,0) && win(-1,0)&& coin(+1,0)){
                player.x=player.x-1
             }
          },
-         b(player){
-            contador++
-            console.log(`'wall${contador}':{x:${state.players.player1.x}, y:${state.players.player1.y}},`)
-         }
+         
          
       }
       const keyPressed = command.keyPressed
@@ -424,6 +422,20 @@ export default function createGame(){
          let win = state.destiny[NumWin]
          if(posFutureX == win.x && posFutureY == win.y){ 
             window.alert('vc ganhou')
+         } else{}}
+      return result
+   }
+   function coin(commandX, commandY){
+      const playerPos = state.players.player1
+      const posFutureX = playerPos.x + commandX
+      const posFutureY = playerPos.y + commandY
+      let result = true
+      for(let coinNUm in state.coins){
+         let coin = state.coins[coinNUm]
+         if(posFutureX == coin.x && posFutureY == coin.y){ 
+            pontos ++
+            coin.x = -1
+            coin.y = -1
          } else{}}
       return result
    }
