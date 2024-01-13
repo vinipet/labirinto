@@ -12,6 +12,7 @@ O projeto ainda está em desenvolvimento e as próximas atualizações serão vo
 - [ ] melhorar e adicionar mecanicas, uma nova por mundo
 - [ ] melhorar o sistema de muros
 - [ ] mehorar o sistema de mapeamento de mundo pra ser facilmente trocado
+- [ ] melhorar o sistema de movimento, reduzindo o numero de funcçoes
 - [ ] adicionar um modo multijogador, com back-end
 - [ ] tornar responsivel
 - [ ] viabilizar o game em dispositivos moveis
