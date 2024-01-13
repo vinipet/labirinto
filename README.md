@@ -28,7 +28,7 @@ Antes de começar, verifique se você atendeu aos seguintes requisitos:
 Para usar <labirinto>, clique no link:
 
 
-[link](vinipet.github.io/labirinto)
+[link](https://vinipet.github.io/labirinto/)
 
 ## Creditos🤝 
 
