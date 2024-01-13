@@ -8,13 +8,13 @@
 
 O projeto ainda está em desenvolvimento e as próximas atualizações serão voltadas nas seguintes tarefas:
 
-- [] adicionar mais mundos
-- [] melhorar e adicionar mecanicas, uma nova por mundo
-- [] melhorar o sistema de muros
-- [] mehorar o sistema de mapeamento de mundo pra ser facilmente trocado
-- [] adicionar um modo multijogador, com back-end
-- [] tornar responsivel
-- [] viabilizar o game em dispositivos moveis
+- [ ] adicionar mais mundos
+- [ ] melhorar e adicionar mecanicas, uma nova por mundo
+- [ ] melhorar o sistema de muros
+- [ ] mehorar o sistema de mapeamento de mundo pra ser facilmente trocado
+- [ ] adicionar um modo multijogador, com back-end
+- [ ] tornar responsivel
+- [ ] viabilizar o game em dispositivos moveis
 
 ## 💻 Pré-requisitos
 
