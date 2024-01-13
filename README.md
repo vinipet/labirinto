@@ -1,6 +1,6 @@
 # Labirinto
 
-<img src="assets/img/print-aplicação.png"  alt="print da aplicação" style="width: 300px;">
+<img src="assets/img/print-aplicação.png"  alt="print da aplicação" >
 
 > Um labirinto usando o canvas do HTML. Contem algumas mecanicas como teleporte e moedas pra ficar menos chato.
 
