@@ -1,6 +1,5 @@
 export default function createGame(mundo){
    let state = mundo
-   console.log(state)
    function movePlayer(command){
 
       const acceptedMovements = {

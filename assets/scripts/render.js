@@ -4,7 +4,7 @@ export default function renderScreen(screen, game, requestAnimationFrame) {
    ponto.innerHTML= `Você tem ${game.state.pontos} pontos`
 
    screen.fillStyle = 'white'
-   screen.clearRect(0,0,25,25)
+   screen.clearRect(0,0,game.state.screen.width,game.state.screen.height)
    
    for(const playerId in game.state.players){
       const player = game.state.players[playerId]
