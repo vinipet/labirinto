@@ -1,5 +1,6 @@
 export default function createGame(mundo){
    let state = mundo
+   let contador= 151
    function movePlayer(command){
 
       const acceptedMovements = {
@@ -24,6 +25,10 @@ export default function createGame(mundo){
                player.x=player.x-1
             }
          },
+         b(){
+            contador++
+            console.log(`'wall${contador}':{x:${state.players.player1.x}, y:${state.players.player1.y}},`)
+         }
          
          
       }
