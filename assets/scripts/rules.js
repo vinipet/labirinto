@@ -1,6 +1,6 @@
 export default function createGame(mundo){
    let state = mundo
-   let contador= 151
+   let contador= 336 
    function movePlayer(command){
 
       const acceptedMovements = {
@@ -25,9 +25,19 @@ export default function createGame(mundo){
                player.x=player.x-1
             }
          },
-         b(){
+         b(player){
+         const obj = JSON.stringify(state)
+            console.log(obj)
+         },
+         m(player){
+           let cordenadas = {x: player.x, y: player.y}
+           state.walls[contador] = cordenadas 
+           contador++
+         }, 
+         n(player){
+            let cordenadas = {x: player.x, y: player.y}
+            state.coins[contador] = cordenadas 
             contador++
-            console.log(`'wall${contador}':{x:${state.players.player1.x}, y:${state.players.player1.y}},`)
          }
          
          
