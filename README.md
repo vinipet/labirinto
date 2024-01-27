@@ -16,6 +16,7 @@ O projeto ainda está em desenvolvimento e as próximas atualizações serão vo
 - [ ] adicionar um modo multijogador, com back-end
 - [ ] tornar responsivel
 - [ ] viabilizar o game em dispositivos moveis
+- [ ] Adicionar um modo de criar mapas 
 
 ## 💻 Pré-requisitos
 
