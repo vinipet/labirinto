@@ -1,6 +1,6 @@
 export default function createGame(mundo){
    let state = mundo
-   let contador= 336 
+   let contador= 405 
    function movePlayer(command){
 
       const acceptedMovements = {
@@ -41,6 +41,23 @@ export default function createGame(mundo){
          },
          c(player){
             console.log(`x:${player.x} y:${ player.y}`)
+         },
+         v(player){
+            let cordenadas = {x: player.x, y: player.y}
+            state.destiny[contador] = cordenadas 
+            contador++
+         },
+         x(player){
+            let cordenadas = {x: player.x, y: player.y}
+            state.tp[contador] = cordenadas 
+            let to ={
+               x:Number(prompt('digite a cordenada X')),
+               y:Number(prompt('digite a cordenada y'))
+            }
+            state.tp[contador].destino = to
+            contador++
+            state.tp[contador] = to
+            state.tp[contador].destino = cordenadas
          }
          
          
