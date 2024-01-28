@@ -51,6 +51,7 @@ h1{
 
 .mundo{
    margin: 20px;
+   height: 150px;
    background-color: white;
 }
 
@@ -66,8 +67,8 @@ p{
 }
 
 img{
-   
-   width: auto;
+   height: 100%;
+   width: 100%;
 }
 
 canvas{
