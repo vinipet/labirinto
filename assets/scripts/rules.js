@@ -40,7 +40,7 @@ export default function createGame(mundo){
             contador++
          },
          c(player){
-            console.log(player.x, player.y)
+            console.log(`x:${player.x} y:${ player.y}`)
          }
          
          
@@ -81,6 +81,7 @@ export default function createGame(mundo){
          let win = state.destiny[NumWin]
          if(posFutureX == win.x && posFutureY == win.y){ 
             window.alert('vc ganhou')
+            window.location.href = '../index.html'
          } else{}}
       return result
    }
