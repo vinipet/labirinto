@@ -26,7 +26,7 @@ export default function createGame(mundo){
             }
          },
          b(player){
-         const obj = JSON.stringify(state)
+         const obj = JSON.stringify(state,0,1)
             console.log(obj)
          },
          m(player){
@@ -48,16 +48,18 @@ export default function createGame(mundo){
             contador++
          },
          x(player){
-            let cordenadas = {x: player.x, y: player.y}
-            state.tp[contador] = cordenadas 
+            let x = player.x 
+            let y = player.y
             let to ={
-               x:Number(prompt('digite a cordenada X')),
-               y:Number(prompt('digite a cordenada y'))
+               'x':Number(prompt('digite a cordenada X')),
+               'y':Number(prompt('digite a cordenada y'))
             }
-            state.tp[contador].destino = to
+            
+            state.tp[contador] = {x, y, destino:to}
             contador++
             state.tp[contador] = to
-            state.tp[contador].destino = cordenadas
+            state.tp[contador].destino = {x,y}
+            
          }
          
          
