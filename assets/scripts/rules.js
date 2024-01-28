@@ -1,6 +1,6 @@
 export default function createGame(mundo){
    let state = mundo
-   let contador= 405 
+   let contador= 7556
    function movePlayer(command){
 
       const acceptedMovements = {
