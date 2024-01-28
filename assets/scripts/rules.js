@@ -38,6 +38,9 @@ export default function createGame(mundo){
             let cordenadas = {x: player.x, y: player.y}
             state.coins[contador] = cordenadas 
             contador++
+         },
+         c(player){
+            console.log(player.x, player.y)
          }
          
          
