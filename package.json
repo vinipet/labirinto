@@ -2,7 +2,8 @@
   "name": "labirinto",
   "version": "1.0.0",
   "description": "um jogo de labirinto com mecanicas incriveis",
-  "main": "index.js",
+  "main": "back-end/index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
