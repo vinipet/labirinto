@@ -78,10 +78,11 @@ img, img.img{
 }
 
 canvas{
-   margin: 10px;
    background-color: black;
-   height: 500px;
-   width: 500px;
+   height: auto;
+   width: 700px;
+   max-width: 100vw;
+   min-width: 50vw;
    image-rendering: pixelated;
    image-rendering: crisp-edges;
    image-rendering: -moz-crisp-edges;
@@ -106,5 +107,14 @@ canvas{
 @media (max-width : 466px) {
    section{
    margin-top: 60vh;
+   }
+
+   body{
+      justify-content: flex-start;
+      padding-top: 40px;
+   }
+
+   #points{
+
    }
 }
