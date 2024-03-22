@@ -90,12 +90,37 @@ canvas{
 }
 
 #controles{
-   margin: 4px;
-   height: 30%;
+   display: none;
+   height: 40%;
    width: 100%;
    background-color: rgba(255, 255, 255, 0.243);
    position: fixed;
    bottom: 0;
+}
+
+.mov-control{
+   background-color: rgba(0, 0, 0, 0.228);
+   border: rgba(245, 222, 179, 0.504) 2px solid;
+   border-radius: 500px;
+   padding: 4px;
+   width: min-content;
+   transition: all .5s;
+}
+
+.mov-control:active{
+   transform: scale(.8);
+   background-color: rgba(0, 0, 0, 0.704);
+}
+
+.lados{
+   display: flex;
+   width:100%;
+   justify-content: space-around;
+}
+
+
+span.seta{
+   font-size: 70px;
 }
 
 #points{
@@ -112,6 +137,14 @@ canvas{
    body{
       justify-content: flex-start;
       padding-top: 40px;
+   }
+
+   #controles{
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
    }
 
    
