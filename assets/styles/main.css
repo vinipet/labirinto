@@ -98,7 +98,7 @@ canvas{
    bottom: 0;
 }
 
-.mov-control{
+div.mov-control{
    background-color: rgba(0, 0, 0, 0.228);
    border: rgba(245, 222, 179, 0.504) 2px solid;
    border-radius: 500px;
@@ -107,12 +107,12 @@ canvas{
    transition: all .5s;
 }
 
-.mov-control:active{
+div.mov-control:active{
    transform: scale(.8);
    background-color: rgba(0, 0, 0, 0.704);
 }
 
-.lados{
+div.lados{
    display: flex;
    width:100%;
    justify-content: space-around;
