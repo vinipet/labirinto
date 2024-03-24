@@ -98,7 +98,7 @@ canvas{
    bottom: 0;
 }
 
-div.mov-control{
+button.mov-control{
    background-color: rgba(0, 0, 0, 0.228);
    border: rgba(245, 222, 179, 0.504) 2px solid;
    border-radius: 500px;
@@ -107,7 +107,7 @@ div.mov-control{
    transition: all .5s;
 }
 
-div.mov-control:active{
+button.mov-control:active{
    transform: scale(.8);
    background-color: rgba(0, 0, 0, 0.704);
 }
