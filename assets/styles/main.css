@@ -104,7 +104,7 @@ button.mov-control{
    border-radius: 500px;
    padding: 4px;
    width: min-content;
-   transition: all .5s;
+   transition: all .1s;
 }
 
 button.mov-control:active{
