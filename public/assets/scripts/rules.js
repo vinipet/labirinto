@@ -1,6 +1,49 @@
 export default function createGame(mundo){
    let state = mundo
-   let contador= 7556
+   let contador= 0
+
+   const observers = []
+
+   function subscribe(observerFunction) {
+      observers.push(observerFunction)
+   }
+
+   function notifyAll(command) {
+      for (const observerFunction of observers) {
+         observerFunction(command)
+      }
+   }
+
+   function addPlayer(command) {
+      const playerId = command.playerId
+      const playerX = 'playerX' in command ? command.playerX : Math.floor(Math.random() * state.screen.width)
+      const playerY = 'playerY' in command ? command.playerY : Math.floor(Math.random() * state.screen.height)
+
+      state.players[playerId] = {
+          x: playerX,
+          y: playerY
+      }
+
+      notifyAll({
+          type: 'add-player',
+          playerId: playerId,
+          playerX: playerX,
+          playerY: playerY
+      })
+   }
+
+   function removePlayer(command) {
+      const playerId = command.playerId
+
+      delete state.players[playerId]
+
+      notifyAll({
+          type: 'remove-player',
+          playerId: playerId
+      })
+   }
+
+   
    function movePlayer(command){
 
       const acceptedMovements = {
@@ -76,6 +119,10 @@ export default function createGame(mundo){
    
    return {
       movePlayer,
+      addPlayer,
+      removePlayer,
+      movePlayer,
+      subscribe,
       state
    }
    
@@ -133,4 +180,5 @@ export default function createGame(mundo){
          } else{}}
       return result
    }
+  
 }

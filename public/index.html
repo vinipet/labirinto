@@ -1,30 +1,43 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <link rel="stylesheet" href="assets/styles/main.css">
    <title>Labirinto</title>
+   <link rel="stylesheet" href="../assets/styles/main.css">
+   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-   <section>
-      <h1>selecione o  Nivel</h1>
-      <div class="mundos">
-         
-         <div class="mundo"><a href="pages/firstWorld.html"><p>mundo 1</p> <img  class="img" src="assets/img/world1.png" alt="imagen do mundo"> </a></div>
+   <p id="points"> voce tem mts ponto</p>
+   <canvas id="screen" width="50" height="50" ></canvas>
 
-         <div class="mundo"><a href="pages/secondWorld.html"><p>mundo 2</p> <img class="img" src="assets/img/print-aplicação.png" alt="imagen do mundo"> </a></div>
+   <!-- <div id="controles">
+      
+   </div> -->
+   <script type="module" >
+      import createKeyboardListener from '../assets/scripts/keyboardListener.js'
+      import renderScreen from '../assets/scripts/render.js'
+      import createGame from '../assets/scripts/rules.js'
 
-         <div class="mundo"><a href="pages/thirdWorld.html"><p>mundo 3</p> <img class="img" src="assets/img/null.png" alt="imagen do mundo"> </a></div>
+      
+      const game = createGame()
+      const canvaElement = document.getElementById('screen')
+      const screen = canvaElement.getContext('2d')
+      const keyboardListener = createKeyboardListener(document)
+      keyboardListener.subscribe(game.movePlayer)
+      
+      renderScreen(screen,game,requestAnimationFrame)
+      
+      
+   </script>
+   <script>
+      const socket = io()
+      
+      socket.on('connect', () => {
+         const playerId = socket.id
+         console.log(`Player connected on Client with id: ${playerId}`)
 
-         <div class="mundo"><a href="pages/fothyworld.html"><p>mundo 4</p> <img class="img" src="assets/img/null.png" alt="imagen do mundo"> </a></div>
-
-         <div class="mundo"><a href="pages/world5.html"><p>mundo 5</p> <img class="img" src="assets/img/null.png" alt="imagen do mundo"> </a></div>
-
-         <div class="mundo"><a href="pages/world6.html"><p>mundo 6</p> <img class="img" src="assets/img/null.png" alt="imagen do mundo"> </a></div>
-
-      </div>
-   </section>
-
+      })
+   </script>
 </body>
 </html>
