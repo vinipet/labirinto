@@ -6,7 +6,10 @@ const mundo ={
       
    },
    walls: {
-
+      "0": {
+         "x": 1,
+         "y": 1
+        },
    },
    destiny: {
       '1': {x:24, y:24,},

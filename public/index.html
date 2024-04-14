@@ -18,26 +18,32 @@
       import createKeyboardListener from '../assets/scripts/keyboardListener.js'
       import renderScreen from '../assets/scripts/render.js'
       import createGame from '../assets/scripts/rules.js'
-
       
       const game = createGame()
-      const canvaElement = document.getElementById('screen')
-      const screen = canvaElement.getContext('2d')
-      const keyboardListener = createKeyboardListener(document)
-      keyboardListener.subscribe(game.movePlayer)
-      
-      renderScreen(screen,game,requestAnimationFrame)
-      
-      
-   </script>
-   <script>
+
       const socket = io()
-      
       socket.on('connect', () => {
          const playerId = socket.id
          console.log(`Player connected on Client with id: ${playerId}`)
 
       })
+
+      socket.on('setup', (state)=>{
+         console.log(`> recebendo setup do server`)
+         console.log(state)
+         game.state = state
+         renderScreen(screen,game,requestAnimationFrame)
+      })
+      
+      const canvaElement = document.getElementById('screen')
+      const screen = canvaElement.getContext('2d')
+      const keyboardListener = createKeyboardListener(document)
+      keyboardListener.subscribe(game.movePlayer)
+      
+      
+      
+   
+      
    </script>
 </body>
 </html>
