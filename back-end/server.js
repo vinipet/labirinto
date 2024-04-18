@@ -10,20 +10,34 @@ app.use(Express.static('public'))
 
 
 
-import mundo from '../back-end/worldsMaps/mundo-test.js'
 
-const game = CreateGame(mundo)
-game.addPlayer({playerId:'player1' ,playerX:25, playerY:43})
-game.movePlayer({playerId:'player1', keyPressed:'ArrowLeft'})
-
+import mundo from '../back-end/worldsMaps/wolrd1.js'
+const game = CreateGame()
+// game.setState(mundo)
 console.log(game.state)
+
+game.subscribe((command)=>{
+   console.log(`> emitting ${command.type}`)
+   sockets.emit(command.type, command)
+})
+
 
 sockets.on( 'connection', (socket)=>{
    const playerId = socket.id
    console.log(`> player conected on id ${playerId}`)
 
+   game.addPlayer({playerId:playerId})
+   console.log(game.state)
+
    socket.emit('setup', game.state)
+
+   socket.on('disconnect', () => {
+      game.removePlayer({playerId:playerId})
+   })
+
 })
+
+
 
 server.listen(8080, ()=>{
    console.log('servidor ligado na porta 8080')

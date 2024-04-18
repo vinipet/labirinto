@@ -1,5 +1,23 @@
-export default function createGame(mundo){
-   let state = mundo
+export default function createGame(){
+   let state = {
+      pontos: 0,
+      screen:{width:50, height:50},
+      players: {
+         
+      },
+      walls: {
+        
+      },
+      destiny: {
+         '1': {x:24, y:24,},
+      },
+      coins: {
+   
+      },
+      tp: {
+        
+      }
+   }
    let contador= 0
 
    const observers = []
@@ -34,7 +52,7 @@ export default function createGame(mundo){
 
    function removePlayer(command) {
       const playerId = command.playerId
-
+      console.log(`removendo ${playerId}`)
       delete state.players[playerId]
 
       notifyAll({
@@ -43,28 +61,31 @@ export default function createGame(mundo){
       })
    }
 
+   function setState(newState){
+      Object.assign(state,newState)
+   }
    
    function movePlayer(command){
 
       const acceptedMovements = {
          ArrowUp(player){
 
-            if(player.y-1 >=0 && wall(0,-1) && win(0,-1)&& coin(0,-1) && tp(0,-1)){
+            if(player.y-1 >=0 && wall(0,-1,player) && win(0,-1,player)&& coin(0,-1,player) && tp(0,-1,player)){
                player.y = player.y-1
             }
          },
          ArrowRight(player){
-            if(player.x+1<state.screen.width && wall(+1,0) && win(+1,0) && coin(+1,0) && tp(+1,0)){
+            if(player.x+1<state.screen.width && wall(+1,0,player) && win(+1,0,player) && coin(+1,0,player) && tp(+1,0,player)){
                player.x =player.x+1
             }
          },
          ArrowDown(player){
-            if(player.y+1<state.screen.height && wall(0,+1) && win(0,+1)&& coin(0,+1) && tp(0,+1)){
+            if(player.y+1<state.screen.height && wall(0,+1,player) && win(0,+1,player)&& coin(0,+1,player) && tp(0,+1,player)){
                player.y=player.y+1
             }
          },
          ArrowLeft(player){
-            if(player.x-1>=0 && wall(-1,0) && win(-1,0)&& coin(-1,0) && tp(-1,0)){
+            if(player.x-1>=0 && wall(-1,0,player) && win(-1,0,player)&& coin(-1,0,player) && tp(-1,0,player)){
                player.x=player.x-1
             }
          },
@@ -103,7 +124,13 @@ export default function createGame(mundo){
             state.tp[contador] = to
             state.tp[contador].destino = {x,y}
             
-         }
+         },
+         u(player){
+            console.log(player)
+
+            // console.log(removePlayer({player:player}))
+            
+         },
          
          
       }
@@ -117,17 +144,8 @@ export default function createGame(mundo){
      
    }
    
-   return {
-      movePlayer,
-      addPlayer,
-      removePlayer,
-      movePlayer,
-      subscribe,
-      state
-   }
-   
-   function wall(commandX, commandY){
-      const playerPos = state.players.player1
+   function wall(commandX, commandY, player){
+      const playerPos = player
       const posFutureX = playerPos.x + commandX
       const posFutureY = playerPos.y + commandY
       let result = true
@@ -138,8 +156,8 @@ export default function createGame(mundo){
          } else{}}
       return result
    }
-   function win(commandX, commandY){
-      const playerPos = state.players.player1
+   function win(commandX, commandY, player){
+      const playerPos = player
       const posFutureX = playerPos.x + commandX
       const posFutureY = playerPos.y + commandY
       let result = true
@@ -151,8 +169,8 @@ export default function createGame(mundo){
          } else{}}
       return result
    }
-   function coin(commandX, commandY){
-      const playerPos = state.players.player1
+   function coin(commandX, commandY, player){
+      const playerPos = player
       const posFutureX = playerPos.x + commandX
       const posFutureY = playerPos.y + commandY
       let result = true
@@ -165,8 +183,8 @@ export default function createGame(mundo){
          } else{}}
       return result
    }
-   function tp(commandX, commandY){
-      const playerPos = state.players.player1
+   function tp(commandX, commandY, player){
+      const playerPos = player
       const posFutureX = playerPos.x + commandX
       const posFutureY = playerPos.y + commandY
       let result = true
@@ -179,6 +197,16 @@ export default function createGame(mundo){
             result = false
          } else{}}
       return result
+   }
+
+   return {
+      movePlayer,
+      addPlayer,
+      removePlayer,
+      movePlayer,
+      subscribe,
+      state,
+      setState,
    }
   
 }
