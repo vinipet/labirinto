@@ -27,10 +27,13 @@ Antes de começar, verifique se você atendeu aos seguintes requisitos:
 
 ## ☕ Usando <Labirinto>
 
-Para usar <labirinto>, clique no link:
+Para usar a versão beta do <labirinto>, clique no link:
 
 
 [link](https://vinipet.github.io/labirinto/)
+
+
+pra jogar a versao completa, instale a ultima versão do node JS, clone o repositorio, e execute o server.js usando o node dentro da pasta back-end. pronto basta entrar na porta descrita no terminal
 
 ## Creditos🤝 
 
