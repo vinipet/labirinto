@@ -13,8 +13,8 @@ O projeto ainda está em desenvolvimento e as próximas atualizações serão vo
 - [x] melhorar o sistema de muros
 - [x] mehorar o sistema de mapeamento de mundo pra ser facilmente trocado
 - [ ] melhorar o sistema de movimento, reduzindo o numero de funcçoes
-- [ ] adicionar um modo multijogador, com back-end
-- [ ] tornar responsivel
+- [x] adicionar um modo multijogador, com back-end
+- [x] tornar responsivel
 - [ ] viabilizar o game em dispositivos moveis
 - [ ] Adicionar um modo de criar mapas 
 
