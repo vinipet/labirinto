@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Labirinto</title>
+   <link rel="stylesheet" href="../assets/styles/main.css">
+   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+   
+   <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+   <p id="points"> voce tem mts ponto</p>
+   <canvas id="screen" width="25" height="25" ></canvas>
+
+   <div id="controles">
+      
+      <button class="mov-control">
+         <span  class="material-symbols-outlined  seta">
+            arrow_upward
+         </span>
+      </button>
+      
+      <div class="lados">
+         <button class="mov-control">
+            <span  class="material-symbols-outlined  seta">
+               arrow_back
+            </span>
+         </button>
+         
+         <button class="mov-control">
+         <span  class="material-symbols-outlined  seta">
+            arrow_right_alt
+         </span>
+         </button>
+      </div>
+      
+      <button class="mov-control">
+         <span  class="material-symbols-outlined  seta">
+            arrow_downward
+         </span>
+      </button>
+
+   </div>
+   <script type="module" >
+      import createKeyboardListener from '../assets/scripts/keyboardListener.js'
+      import renderScreen from '../assets/scripts/render.js'
+      import createGame from '../assets/scripts/rules.js'
+      
+      const game = createGame()
+      const canvaElement = document.getElementById('screen')
+      const screen = canvaElement.getContext('2d')
+
+      const socket = io()
+      
+      socket.on('connect', () => {
+         const playerId = socket.id
+         renderScreen(screen,game,requestAnimationFrame, playerId )
+      })
+      
+      socket.on('setup', (state)=>{
+         const playerId = socket.id
+         game.setState(state)
+         canvaElement.height = game.state.screen.height
+         canvaElement.width = game.state.screen.width
+         
+         keyboardListener.registerPlayerId(playerId)
+         keyboardListener.subscribe(game.movePlayer)
+         keyboardListener.subscribe((command)=>{
+            socket.emit('move-player', command)
+         })
+      })
+      
+      socket.on('add-player', (command)=>{
+        console.log(`> receiving ${command.type} --> ${command.playerId}`)
+        game.addPlayer(command)
+      })
+      
+      socket.on('remove-player', (command)=>{
+        console.log(`> receiving ${command.type} --> ${command.playerId}`)
+        game.removePlayer(command)
+      })
+      
+      socket.on('move-player', (command)=>{
+         console.log(`> receiving ${command.type} --> ${command.playerId}`)
+         const playerId = socket.id
+         
+         if(playerId !== command.playerId){
+            game.movePlayer(command)
+         }
+      })
+      
+      
+      
+      
+      const keyboardListener = createKeyboardListener(document)
+      
+   </script>
+</body>
+</html>
