@@ -194,8 +194,8 @@ export default function createGame(){
       for(let tpId in state.tp){
          let tp = state.tp[tpId]
          if(posFutureX == tp.x && posFutureY == tp.y){ 
-            state.players.player1.x = tp.destino.x
-            state.players.player1.y = tp.destino.y
+            player.x = tp.destino.x
+            player.y = tp.destino.y
             result = false
          } else{}}
       return result
