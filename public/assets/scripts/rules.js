@@ -1,7 +1,7 @@
 export default function createGame(){
    let state = {
       pontos: 0,
-      screen:{width:50, height:50},
+      screen:{},
       players: {
          
       },

@@ -9,7 +9,7 @@
 </head>
 <body>
    <p id="points"> voce tem mts ponto</p>
-   <canvas id="screen" width="50" height="50" ></canvas>
+   <canvas id="screen" width="25" height="25" ></canvas>
 
    <!-- <div id="controles">
       
@@ -20,19 +20,21 @@
       import createGame from '../assets/scripts/rules.js'
       
       const game = createGame()
+      const canvaElement = document.getElementById('screen')
+      const screen = canvaElement.getContext('2d')
 
       const socket = io()
       
       socket.on('connect', () => {
          const playerId = socket.id
-         const canvaElement = document.getElementById('screen')
-         const screen = canvaElement.getContext('2d')
          renderScreen(screen,game,requestAnimationFrame, playerId )
       })
       
       socket.on('setup', (state)=>{
          const playerId = socket.id
          game.setState(state)
+         canvaElement.height = game.state.screen.height
+         canvaElement.width = game.state.screen.width
          
          keyboardListener.registerPlayerId(playerId)
          keyboardListener.subscribe(game.movePlayer)
