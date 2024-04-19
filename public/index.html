@@ -22,19 +22,23 @@
       const game = createGame()
 
       const socket = io()
-
+      
       socket.on('connect', () => {
          const playerId = socket.id
-         const screen = document.getElementById('screen')
+         const canvaElement = document.getElementById('screen')
+         const screen = canvaElement.getContext('2d')
+         renderScreen(screen,game,requestAnimationFrame, playerId )
       })
       
       socket.on('setup', (state)=>{
          const playerId = socket.id
          game.setState(state)
-
+         
          keyboardListener.registerPlayerId(playerId)
          keyboardListener.subscribe(game.movePlayer)
-         renderScreen(screen,game,requestAnimationFrame)
+         keyboardListener.subscribe((command)=>{
+            socket.emit('move-player', command)
+         })
       })
       
       socket.on('add-player', (command)=>{
@@ -46,14 +50,20 @@
         console.log(`> receiving ${command.type} --> ${command.playerId}`)
         game.removePlayer(command)
       })
-
-      const canvaElement = document.getElementById('screen')
-      const screen = canvaElement.getContext('2d')
+      
+      socket.on('move-player', (command)=>{
+         console.log(`> receiving ${command.type} --> ${command.playerId}`)
+         const playerId = socket.id
+         
+         if(playerId !== command.playerId){
+            game.movePlayer(command)
+         }
+      })
+      
+      
+      
+      
       const keyboardListener = createKeyboardListener(document)
-      
-      
-      
-   
       
    </script>
 </body>

@@ -1,4 +1,4 @@
-export default function renderScreen(screen, game, requestAnimationFrame) {
+export default function renderScreen(screen, game, requestAnimationFrame, currentPlayerId) {
 
    let ponto = document.getElementById('points')
    ponto.innerHTML= `Você tem ${game.state.pontos} pontos`
@@ -31,7 +31,14 @@ export default function renderScreen(screen, game, requestAnimationFrame) {
       screen.fillStyle = 'blue'
       screen.fillRect(player.x, player.y, 1, 1)
    }
+
+   const currentPlayer = game.state.players[currentPlayerId]
+   if(currentPlayer){
+   screen.fillStyle = '#00ffff'
+   screen.fillRect(currentPlayer.x, currentPlayer.y, 1, 1)
+   }
+
    requestAnimationFrame(() => {
-      renderScreen(screen, game, requestAnimationFrame)
+      renderScreen(screen, game, requestAnimationFrame, currentPlayerId)
   })
 }

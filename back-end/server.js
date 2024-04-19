@@ -11,9 +11,9 @@ app.use(Express.static('public'))
 
 
 
-import mundo from '../back-end/worldsMaps/wolrd1.js'
+import mundo from '../back-end/worldsMaps/wolrd3.js'
 const game = CreateGame()
-// game.setState(mundo)
+game.setState(mundo)
 console.log(game.state)
 
 game.subscribe((command)=>{
@@ -26,13 +26,19 @@ sockets.on( 'connection', (socket)=>{
    const playerId = socket.id
    console.log(`> player conected on id ${playerId}`)
 
-   game.addPlayer({playerId:playerId})
+   game.addPlayer({playerId:playerId, playerX:0,playerY:0})
    console.log(game.state)
 
    socket.emit('setup', game.state)
 
    socket.on('disconnect', () => {
       game.removePlayer({playerId:playerId})
+   })
+
+   socket.on('move-player', (command)=>{
+      command.playerId = playerId
+      command.type = 'move-player'
+      game.movePlayer(command)
    })
 
 })

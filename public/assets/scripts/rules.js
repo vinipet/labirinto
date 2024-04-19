@@ -67,6 +67,8 @@ export default function createGame(){
    
    function movePlayer(command){
 
+      notifyAll(command)
+
       const acceptedMovements = {
          ArrowUp(player){
 

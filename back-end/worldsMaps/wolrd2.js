@@ -3,7 +3,7 @@ const mundo ={
    pontos: 0,
    screen:{width:25, height:25},
    players: {
-      'player1': {x:0, y:0}
+     
    },
    walls: {
 
