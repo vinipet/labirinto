@@ -3,7 +3,13 @@ export default function createGame(){
       pontos: 0,
       screen:{},
       players: {
-         
+
+      },
+      door:{
+         door1:{x:12 , y:9}
+      },
+      plate:{
+         plate1:{x:12, y:1 , door:'door1'}
       },
       walls: {
         
@@ -18,7 +24,7 @@ export default function createGame(){
         
       }
    }
-   let contador= 0
+   let contador = 0
 
    const observers = []
 
@@ -66,28 +72,52 @@ export default function createGame(){
    }
    
    function movePlayer(command){
-
       notifyAll(command)
 
       const acceptedMovements = {
          ArrowUp(player){
 
-            if(player.y-1 >=0 && wall(0,-1,player) && win(0,-1,player)&& coin(0,-1,player) && tp(0,-1,player)){
+            if(player.y-1 >=0 && 
+               wall(0,-1,player) && 
+               win(0,-1,player) && 
+               coin(0,-1,player) && 
+               tp(0,-1,player) && 
+               door(0,-1,player) && 
+               plate(0,-1,player) ){
+
                player.y = player.y-1
             }
          },
          ArrowRight(player){
-            if(player.x+1<state.screen.width && wall(+1,0,player) && win(+1,0,player) && coin(+1,0,player) && tp(+1,0,player)){
+            if(player.x+1<state.screen.width && 
+               wall(+1,0,player) && 
+               win(+1,0,player) && 
+               coin(+1,0,player) && 
+               tp(+1,0,player) && 
+               door(+1,0,player) && 
+               plate(+1,0,player)){
                player.x =player.x+1
             }
          },
          ArrowDown(player){
-            if(player.y+1<state.screen.height && wall(0,+1,player) && win(0,+1,player)&& coin(0,+1,player) && tp(0,+1,player)){
+            if(player.y+1<state.screen.height && 
+               wall(0,+1,player) && 
+               win(0,+1,player) && 
+               coin(0,+1,player) && 
+               tp(0,+1,player) && 
+               door(0,+1,player) && 
+               plate(0,+1,player)){
                player.y=player.y+1
             }
          },
          ArrowLeft(player){
-            if(player.x-1>=0 && wall(-1,0,player) && win(-1,0,player)&& coin(-1,0,player) && tp(-1,0,player)){
+            if(player.x-1>=0 && 
+               wall(-1,0,player) && 
+               win(-1,0,player) && 
+               coin(-1,0,player) && 
+               tp(-1,0,player) && 
+               door(-1,0,player) && 
+               plate(-1,0,player)){
                player.x=player.x-1
             }
          },
@@ -127,13 +157,20 @@ export default function createGame(){
             state.tp[contador].destino = {x,y}
             
          },
+         z(player){
+            let cordenadas = {x: player.x, y: player.y}
+            state.plate[contador] = cordenadas 
+            let to ={
+               'x':Number(prompt('digite a cordenada X')),
+               'y':Number(prompt('digite a cordenada y'))
+            }
+            state.door[contador] = to
+            state.plate[contador].door = state.door[contador]
+            contador++
+          }, 
          u(player){
             console.log(player)
-
-            // console.log(removePlayer({player:player}))
-            
          },
-         
          
       }
       const keyPressed = command.keyPressed
@@ -166,8 +203,8 @@ export default function createGame(){
       for(let NumWin in state.destiny){
          let win = state.destiny[NumWin]
          if(posFutureX == win.x && posFutureY == win.y){ 
-            window.alert('vc ganhou')
-            window.location.href = '../index.html'
+            //window.alert('vc ganhou')
+            //window.location.href = '../index.html'
          } else{}}
       return result
    }
@@ -200,6 +237,37 @@ export default function createGame(){
          } else{}}
       return result
    }
+   function door(commandX, commandY, player){
+      const playerPos = player
+      const posFutureX = playerPos.x + commandX
+      const posFutureY = playerPos.y + commandY
+      let result = true
+      for(let NumDoor in state.door){
+         let door = state.door[NumDoor]
+         if(posFutureX == door.x && posFutureY == door.y){ 
+            result = false
+         } else{}}
+      return result
+   }
+   function plate(commandX, commandY, player){
+      const playerPos = player
+      const posFutureX = playerPos.x + commandX
+      const posFutureY = playerPos.y + commandY
+      
+      for(let plateId in state.plate){
+         let plate = state.plate[plateId]
+         if(posFutureX == plate.x && posFutureY == plate.y){ 
+            const door = plate.door
+            console.log(door)
+            delete state.door[door]
+            delete state.plate
+         }}
+      return true
+   }
+
+
+
+
 
    return {
       movePlayer,

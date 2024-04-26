@@ -33,5 +33,6 @@ export default function createKeyboardListener(){
       subscribe,
       notifyAll,
       registerPlayerId,
+      handleKeydown
    }
 }

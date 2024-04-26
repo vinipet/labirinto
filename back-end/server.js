@@ -11,7 +11,7 @@ app.use(Express.static('public'))
 
 
 
-import mundo from '../back-end/worldsMaps/wolrd2.js'
+import mundo from '../back-end/worldsMaps/wolrd3.js'
 const game = CreateGame()
 game.setState(mundo)
 console.log(game.state)
