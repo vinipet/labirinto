@@ -1,4 +1,4 @@
-export default function createKeyboardListener(){
+export default function createMobileListener(){
    const state = {
       observers: [],
       playerId:null
@@ -33,6 +33,5 @@ export default function createKeyboardListener(){
       subscribe,
       notifyAll,
       registerPlayerId,
-      handleKeydown
    }
 }

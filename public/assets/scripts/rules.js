@@ -3,7 +3,7 @@ export default function createGame(){
       pontos: 0,
       screen:{},
       players: {
-         
+
       },
       walls: {
         
@@ -66,7 +66,7 @@ export default function createGame(){
    }
    
    function movePlayer(command){
-
+      console.log(command)
       notifyAll(command)
 
       const acceptedMovements = {
@@ -166,8 +166,8 @@ export default function createGame(){
       for(let NumWin in state.destiny){
          let win = state.destiny[NumWin]
          if(posFutureX == win.x && posFutureY == win.y){ 
-            window.alert('vc ganhou')
-            window.location.href = '../index.html'
+            //window.alert('vc ganhou')
+            //window.location.href = '../index.html'
          } else{}}
       return result
    }
