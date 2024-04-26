@@ -11,6 +11,16 @@ export default function renderScreen(screen, game, requestAnimationFrame, curren
       screen.fillStyle = 'white'
       screen.fillRect(wall.x, wall.y, 1, 1)
    }
+   for(const doorId in game.state.door){
+      const door = game.state.door[doorId]
+      screen.fillStyle = '#a5c9ca'
+      screen.fillRect(door.x, door.y, 1, 1)
+   }
+   for(const plateId in game.state.plate){
+      const plate = game.state.plate[plateId]
+      screen.fillStyle = '#808080'
+      screen.fillRect(plate.x, plate.y, 1, 1)
+   }
    for(const destinyId in game.state.destiny){
       const destiny = game.state.destiny[destinyId]
       screen.fillStyle = 'green'
