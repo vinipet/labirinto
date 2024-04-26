@@ -26,7 +26,7 @@ sockets.on( 'connection', (socket)=>{
    const playerId = socket.id
    console.log(`> player conected on id ${playerId}`)
 
-   game.addPlayer({playerId:playerId, playerX:0,playerY:0})
+   game.addPlayer({playerId:playerId, playerX:12,playerY:0})
    console.log(game.state)
 
    socket.emit('setup', game.state)
