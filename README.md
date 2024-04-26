@@ -9,14 +9,17 @@
 O projeto ainda está em desenvolvimento e as próximas atualizações serão voltadas nas seguintes tarefas:
 
 - [ ] adicionar mais mundos
-- [ ] melhorar e adicionar mecanicas, uma nova por mundo
 - [x] melhorar o sistema de muros
 - [x] mehorar o sistema de mapeamento de mundo pra ser facilmente trocado
-- [ ] melhorar o sistema de movimento, reduzindo o numero de funcçoes
+- [x] melhorar o sistema de movimento, reduzindo o numero de funcçoes
 - [x] adicionar um modo multijogador, com back-end
 - [x] tornar responsivel
-- [ ] viabilizar o game em dispositivos moveis
-- [ ] Adicionar um modo de criar mapas 
+- [x] viabilizar o game em dispositivos moveis
+- [ ] Adicionar um modo de criar mapas
+- [ ] add chaves e portas
+- [ ] add sistema de combate (melle / bombas)
+- [ ] add armadilha
+- [ ] caixas
 
 ## 💻 Pré-requisitos
 
