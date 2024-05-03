@@ -21,61 +21,7 @@ body{
    flex-wrap: wrap;
 }
 
-section{
-   display: flex;
-   flex-direction: row;
-   flex-wrap: wrap;
-   align-items: center;
-   background-color: rgb(125, 173, 119);
-   border: 5px solid rgb(55, 75, 51);
-   border-radius: 10px;
-   justify-content: center;
-   max-width: fit-content;
-}
 
-h1{
-   text-transform: uppercase;
-   text-overflow: ellipsis;
-   font-size: 7vw;
-   max-width: 300px;
-   font-size: 50px;
-   text-align: center;
-   display: block;
-}
-
-.mundos{
-   max-width: 700px;
-    margin: 50px;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-content: center;
-    justify-content: center;
-    align-items: center;
-}
-
-.mundo{
-   margin: 20px;
-   height: 150px;
-   background-color: white;
-}
-
-a{
-   text-decoration: none;
-}
-
-p{
-   text-align: center;
-   color: black;
-   text-transform: uppercase;
-   font-weight: bold;
-}
-
-img, img.img{
-   width:140px;
-   max-height: 100%;
-   max-width: 100%;
-}
 
 canvas{
    background-color: black;

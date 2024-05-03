@@ -2,28 +2,13 @@ export default function createGame(){
    let state = {
       pontos: 0,
       screen:{},
-      players: {
-
-      },
-      door:{
-         door1:{x:12 , y:9}
-      },
-      plate:{
-         plate1:{x:12, y:1 , door:'door1'}
-      },
-      walls: {
-        
-      },
-      destiny: {
-         '1': {x:24, y:24,},
-      },
-      coins: {
-   
-      },
-      tp: {
-        
-      }
-   }
+      players: {},
+      door:{},
+      plate:{},
+      walls: {},
+      destiny: {'1': {x:24, y:24,},},
+      coins: {},
+      tp: {}}
    let contador = 0
 
    const observers = []

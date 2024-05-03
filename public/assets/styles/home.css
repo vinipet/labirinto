@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap');
+*{
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+   font-family: Outfit;
+}
+html{
+   height: 100vh;
+   width: 100vw;
+}
+body{
+   background-color: rgb(132, 132, 132);
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   height: 100vh;
+   width: 100vw;
+   justify-content: center;
+   flex-wrap: wrap;
+}
+section{
+   display: flex;
+   flex-direction: column;
+   flex-wrap: wrap;
+   align-items: center;
+   background-color: rgb(125, 173, 119);
+   border: 5px solid rgb(55, 75, 51);
+   border-radius: 10px;
+   justify-content: center;
+   max-width: fit-content;
+}
+h1{
+   text-transform: uppercase;
+   text-overflow: ellipsis;
+   font-size: 7vw;
+   max-width: 300px;
+   font-size: 50px;
+   text-align: center;
+   display: block;
+   margin: 30px;
+}
+.conteiner{
+   max-width: 700px;
+   margin: 50px;
+   display: flex;
+   flex-direction: column;
+   flex-wrap: wrap;
+   align-content: center;
+   justify-content: center;
+   align-items: center;
+}
+.option{
+   margin: 20px;
+   background-color: rgb(55, 75, 51);
+   padding: 10px;
+   border-radius: 10000px;
+   font-size: 25px;
+   color:white;   
+}
+p{
+   text-align: center;
+   color: black;
+   text-transform: uppercase;
+   font-weight: bold;
+}
+img, img.img{
+   width:140px;
+   max-height: 100%;
+   max-width: 100%;
+}
+dialog{
+   margin: auto;
+   border: none;
+   background-color: rgba(0, 0, 0, 0);
+}
+dialog::backdrop{
+   background-color: rgba(0, 0, 0, 0.597);
+}
+
+button{
+   font-size: 50px;
+}
+
+.close{
+   background-color: transparent;
+   color: black;
+   border: none;
+   user-select: none;
+}
+
+.close:active{
+   color:red ;
+}
+
+input{
+   border-radius:10000px;
+   height: 25px;
+   padding: 5px;
+   margin-bottom: 10px;
+}
+
+input:focus{
+   outline: none;
+}
+
+input.send-request{
+   background-color: rgb(55, 75, 51);
+   padding: 10px;
+   border-radius: 10000px;
+   font-size: 20px;
+   color: white;
+   display: block;
+   margin: auto; 
+   height: fit-content;
+}
