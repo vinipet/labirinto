@@ -22,7 +22,7 @@ app.post('/play', function(req, res){
    console.log(req.se)
 
    
-   res.sendFile(__dirname + '/public/play.html')
+   res.sendFile(__dirname + '/public/pages/play.html')
    const game = CreateGame()
    game.setState(mundo[0])
    // console.log(game.state)
