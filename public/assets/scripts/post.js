@@ -5,7 +5,6 @@ const $closeModalBtn = document.getElementsByClassName('close')
 
 
 for (const element of $closeModalBtn) {
-      console.log(element)
       element.addEventListener('click', ()=>{
             $joinServerModal.close()
             $createServerModal.close()
@@ -21,32 +20,26 @@ const $joinServerbtn = document.getElementById('join-server-btn').addEventListen
 })
 
 
-const $createRoomBTN = getElementById(Criar)
-$createRoomBTN.addEventListener('click', (event)=>{
+const $form = document.getElementById('Criar')
+$form.addEventListener('submit', (event)=>{
       event.preventDefault()
-      createRoom()
+      const data = new FormData($form)
+      console.log(data)
+      fetch("/create",{
+            method:'POST',
+            body: data,
+      })
+      .then(async (res) => {
+            const status = await res.text();
+            console.log(res);
+            if (status === 'connected') {
+                location.href = '/play';
+            } else {
+                alert(JSON.stringify(res));
+            }
+        })
+        .catch((error) => {
+            console.error('Erro ao enviar requisição:', error);
+        });
 }) 
 
-
-function createRoom(){
-      const name = getElementById('create-room-name').value
-      const password = getElementById('create-room-password').value
-
-      console.log(JSON.stringify({
-            names: name,
-            passwords: password
-      }))
-      
-      fetch('/play',{
-            method:'POST',
-            body: JSON.stringify({
-                  names: name,
-                  passwords: password
-            }),
-            headers:{'content-type': 'application/json'}
-      })
-      .then(async(resp)=>{
-            const status = await resp.text()
-            console.log(status)
-      })
-}
