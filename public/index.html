@@ -5,7 +5,7 @@
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <link rel="stylesheet" href="assets/styles/home.css">
    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+   <link rel="shortcut icon" href="assets/img/favicon.ico" type="image/x-icon">
    <title>Labirinto</title>
 </head>
 <body>
@@ -30,11 +30,10 @@
          <button translate="no" class="close material-symbols-outlined " >close</button>
          <h1>Criar Sala</h1>
          <div class="conteiner">
-            <form action="/create" method="post">
-               <label for="creatRoomName"><p>Nome da Sala</p></label> <input type="text" name="createRoomName" id="createRoomName" maxlength="20">
+            <form action="/create" method="post" id="Criar">
+               <label for="creatRoomName"><p>Nome da Sala</p></label> <input type="text" name="createRoomName" autocomplete="nickname" id="createRoomName" maxlength="20">
                
-               <label for="RoomPassword"><p>Senha da Sala</p></label> <input type="password" name="creatRoomPassword" id="createRoomPassword" maxlength="8">
-               <input type="submit" value="Criar" class="send-request" id="Criar">
+               <input type="submit" value="Criar" class="send-request" >
             </form>
          </div>
       </section>
@@ -46,10 +45,9 @@
          <button translate="no" class="close material-symbols-outlined " >close</button>
          <h1>Entrar na Sala</h1>
          <div class="conteiner">
-            <form action="assets/scripts/roons.js" method="post">
-               <label for="Room-name"><p>Nome da Sala</p></label> <input type="text" name="Room-name" id="Room-name" maxlength="20">
+            <form action="/join" method="post" id="join">
+               <label for="Room-name"><p>Nome da Sala</p></label> <input type="text" name="Room-name" autocomplete="nickname" id="Room-name" maxlength="20">
                
-               <label for="Room-password"><p>Senha da Sala</p></label> <input type="password" name="Room-password"  id="Room-password" maxlength="8">
                <input type="submit" value="Entrar" class="send-request">
             </form>
          </div>
