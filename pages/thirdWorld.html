@@ -9,9 +9,35 @@
 <body>
    <p id="points"> voce tem mts ponto</p>
    <canvas id="screen" width="25" height="25" ></canvas>
-   <!-- <div id="controles">
+   <div id="controles">
       
-   </div> -->
+      <button class="mov-control">
+         <span  class="material-symbols-outlined  seta" id="ArrowUp">
+            arrow_upward
+         </span>
+      </button>
+      
+      <div class="lados">
+         <button class="mov-control">
+            <span  class="material-symbols-outlined  seta" id="ArrowLeft">
+               arrow_back
+            </span>
+         </button>
+         
+         <button class="mov-control">
+         <span  class="material-symbols-outlined  seta" id="ArrowRight">
+            arrow_right_alt
+         </span>
+         </button>
+      </div>
+      
+      <button class="mov-control">
+         <span  class="material-symbols-outlined  seta" id="ArrowDown">
+            arrow_downward
+         </span>
+      </button>
+
+   </div>
    <script type="module" >
       import createKeyboardListener from '../assets/scripts/keyboardListener.js'
       import renderScreen from '../assets/scripts/render.js'
@@ -25,6 +51,12 @@
       const keyboardListener = createKeyboardListener()
       keyboardListener.subscribe(game.movePlayer)
       
+      const $mobileButtons = document.getElementsByClassName('seta')
+      for(let button of $mobileButtons){
+         button.addEventListener('click', (e)=>{
+            game.movePlayer({playerId: 'player1', keyPressed: button.id})
+         })
+      }
       renderScreen(screen,game,requestAnimationFrame)
    
       
