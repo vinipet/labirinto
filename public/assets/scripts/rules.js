@@ -165,11 +165,16 @@ export default function createGame(){
             state.plate[contador].door = state.door[contador]
             contador++
           }, 
-         u(player){
-            console.log(player)
-         },
-         
-      }
+          u(player){
+             console.log(player)
+          },
+          
+       }
+
+       acceptedMovements['w'] = acceptedMovements['ArrowUp']
+       acceptedMovements['s'] = acceptedMovements['ArrowDown']
+       acceptedMovements['a'] = acceptedMovements['ArrowLeft']
+       acceptedMovements['d'] = acceptedMovements['ArrowRight']
       const keyPressed = command.keyPressed
       const player = state.players[command.playerId]
       const moveFunction = acceptedMovements[keyPressed]

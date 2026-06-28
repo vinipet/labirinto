@@ -4,14 +4,28 @@
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>Labirinto</title>
-   <link rel="stylesheet" href="../assets/styles/main.css">
+    <link rel="stylesheet" href="../assets/styles/main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 <body>
    <p id="points"> voce tem mts ponto</p>
    <canvas id="screen" width="50" height="50" ></canvas>
-   <!-- <div id="controles">
-      
-   </div> -->
+   <div id="controles">
+      <button class="mov-control" data-direction="ArrowUp">
+         <span class="material-symbols-outlined seta">arrow_upward</span>
+      </button>
+      <div class="lados">
+         <button class="mov-control" data-direction="ArrowLeft">
+            <span class="material-symbols-outlined seta">arrow_back</span>
+         </button>
+         <button class="mov-control" data-direction="ArrowRight">
+            <span class="material-symbols-outlined seta">arrow_right_alt</span>
+         </button>
+      </div>
+      <button class="mov-control" data-direction="ArrowDown">
+         <span class="material-symbols-outlined seta">arrow_downward</span>
+      </button>
+   </div>
    <script type="module" >
       import createKeyboardListener from '../assets/scripts/keyboardListener.js'
       import renderScreen from '../assets/scripts/render.js'
@@ -26,6 +40,39 @@
       keyboardListener.subscribe(game.movePlayer)
       
       renderScreen(screen,game,requestAnimationFrame)
+
+      let moveInterval = null
+
+      function startMoving(direction) {
+         const command = { key: direction }
+         keyboardListener.handleKeydown(command)
+         moveInterval = setInterval(() => {
+            keyboardListener.handleKeydown(command)
+         }, 120)
+      }
+
+      function stopMoving() {
+         if (moveInterval) {
+            clearInterval(moveInterval)
+            moveInterval = null
+         }
+      }
+
+      document.querySelectorAll('.mov-control').forEach(btn => {
+         const direction = btn.dataset.direction
+
+         btn.addEventListener('mousedown', () => startMoving(direction))
+         btn.addEventListener('mouseup', stopMoving)
+         btn.addEventListener('mouseleave', stopMoving)
+         btn.addEventListener('touchstart', (e) => {
+            e.preventDefault()
+            startMoving(direction)
+         })
+         btn.addEventListener('touchend', (e) => {
+            e.preventDefault()
+            stopMoving()
+         })
+      })
    
       
    </script>

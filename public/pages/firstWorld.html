@@ -12,31 +12,31 @@
    <canvas id="screen" width="50" height="50" ></canvas>
    <div id="controles">
       
-      <button class="mov-control">
-         <span  class="material-symbols-outlined  seta">
-            arrow_upward
-         </span>
-      </button>
-      
-      <div class="lados">
-         <button class="mov-control">
-            <span  class="material-symbols-outlined  seta">
-               arrow_back
-            </span>
-         </button>
-         
-         <button class="mov-control">
-         <span  class="material-symbols-outlined  seta">
-            arrow_right_alt
-         </span>
-         </button>
-      </div>
-      
-      <button class="mov-control">
-         <span  class="material-symbols-outlined  seta">
-            arrow_downward
-         </span>
-      </button>
+      <button class="mov-control" data-direction="ArrowUp">
+          <span  class="material-symbols-outlined  seta">
+             arrow_upward
+          </span>
+       </button>
+       
+       <div class="lados">
+          <button class="mov-control" data-direction="ArrowLeft">
+             <span  class="material-symbols-outlined  seta">
+                arrow_back
+             </span>
+          </button>
+          
+          <button class="mov-control" data-direction="ArrowRight">
+          <span  class="material-symbols-outlined  seta">
+             arrow_right_alt
+          </span>
+          </button>
+       </div>
+       
+       <button class="mov-control" data-direction="ArrowDown">
+          <span  class="material-symbols-outlined  seta">
+             arrow_downward
+          </span>
+       </button>
 
    </div>
    <script type="module" >
@@ -47,12 +47,45 @@
 
       
       const game = createGame(mundo)
-      const canvaElement = document.getElementById('screen')
-      const screen = canvaElement.getContext('2d')
-      const keyboardListener = createKeyboardListener()
-      keyboardListener.subscribe(game.movePlayer)
-      
-      renderScreen(screen,game,requestAnimationFrame)
+       const canvaElement = document.getElementById('screen')
+       const screen = canvaElement.getContext('2d')
+       const keyboardListener = createKeyboardListener()
+       keyboardListener.subscribe(game.movePlayer)
+       
+       renderScreen(screen,game,requestAnimationFrame)
+
+       let moveInterval = null
+
+       function startMoving(direction) {
+          const command = { key: direction }
+          keyboardListener.handleKeydown(command)
+          moveInterval = setInterval(() => {
+             keyboardListener.handleKeydown(command)
+          }, 120)
+       }
+
+       function stopMoving() {
+          if (moveInterval) {
+             clearInterval(moveInterval)
+             moveInterval = null
+          }
+       }
+
+       document.querySelectorAll('.mov-control').forEach(btn => {
+          const direction = btn.dataset.direction
+
+          btn.addEventListener('mousedown', () => startMoving(direction))
+          btn.addEventListener('mouseup', stopMoving)
+          btn.addEventListener('mouseleave', stopMoving)
+          btn.addEventListener('touchstart', (e) => {
+             e.preventDefault()
+             startMoving(direction)
+          })
+          btn.addEventListener('touchend', (e) => {
+             e.preventDefault()
+             stopMoving()
+          })
+       })
    
       
    </script>

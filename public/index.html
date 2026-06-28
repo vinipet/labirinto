@@ -16,31 +16,31 @@
 
    <div id="controles">
       
-      <button class="mov-control" id="up">
-         <span  class="material-symbols-outlined  seta"  name="ArrowUp"  translate="no">
-            arrow_upward
-         </span> 
-      </button>
-      
-      <div class="lados">
-         <button class="mov-control" id="left">
-            <span  class="material-symbols-outlined  seta" name="ArrowLeft"   translate="no">
-               arrow_back
-            </span>
-         </button>
-         
-         <button class="mov-control" id="right">
-            <span  class="material-symbols-outlined  seta"  name="ArrowRight" translate="no">
-            arrow_right_alt
-         </span>
-         </button>
-      </div>
-      
-      <button class="mov-control" id="down">
-         <span  class="material-symbols-outlined  seta"  name="ArrowDown" translate="no">
-            arrow_downward
-         </span>
-      </button>
+      <button class="mov-control" data-direction="ArrowUp">
+          <span  class="material-symbols-outlined  seta" translate="no">
+             arrow_upward
+          </span> 
+       </button>
+       
+       <div class="lados">
+          <button class="mov-control" data-direction="ArrowLeft">
+             <span  class="material-symbols-outlined  seta" translate="no">
+                arrow_back
+             </span>
+          </button>
+          
+          <button class="mov-control" data-direction="ArrowRight">
+             <span  class="material-symbols-outlined  seta" translate="no">
+             arrow_right_alt
+          </span>
+          </button>
+       </div>
+       
+       <button class="mov-control" data-direction="ArrowDown">
+          <span  class="material-symbols-outlined  seta" translate="no">
+             arrow_downward
+          </span>
+       </button>
 
    </div>
 
@@ -95,21 +95,38 @@ socket.on('move-player', (command)=>{
    
 })
 
-const $btnUp = document.getElementById('up').addEventListener('click', clickEvent)
-const $btnDown = document.getElementById('down').addEventListener('click', clickEvent)
-const $btnLeft = document.getElementById('left').addEventListener('click', clickEvent)
-const $btnRigth = document.getElementById('right').addEventListener('click', clickEvent)
+let moveInterval = null
 
-function clickEvent(event){
-   console.log(event)
-   const direction = event.srcElement.attributes.name.value
-   const command ={
-      key: direction
-   } 
-
-   console.log(direction)
+function startMoving(direction) {
+   const command = { key: direction }
    keyboardListener.handleKeydown(command)
+   moveInterval = setInterval(() => {
+      keyboardListener.handleKeydown(command)
+   }, 120)
 }
+
+function stopMoving() {
+   if (moveInterval) {
+      clearInterval(moveInterval)
+      moveInterval = null
+   }
+}
+
+document.querySelectorAll('.mov-control').forEach(btn => {
+   const direction = btn.dataset.direction
+
+   btn.addEventListener('mousedown', () => startMoving(direction))
+   btn.addEventListener('mouseup', stopMoving)
+   btn.addEventListener('mouseleave', stopMoving)
+   btn.addEventListener('touchstart', (e) => {
+      e.preventDefault()
+      startMoving(direction)
+   })
+   btn.addEventListener('touchend', (e) => {
+      e.preventDefault()
+      stopMoving()
+   })
+})
 </script>
 </body>
 </html>
