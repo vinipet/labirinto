@@ -6,16 +6,13 @@ export default function createGame(){
 
       },
       door:{
-         door1:{x:12 , y:9}
       },
       plate:{
-         plate1:{x:12, y:1 , door:'door1'}
       },
       walls: {
         
       },
       destiny: {
-         '1': {x:24, y:24,},
       },
       coins: {
    
