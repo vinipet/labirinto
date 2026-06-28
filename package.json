@@ -5,12 +5,18 @@
   "main": "back-end/server.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node back-end/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "author": "vinipet",
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
     "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.9"
   }
 }
