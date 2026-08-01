@@ -14,6 +14,9 @@ export default function createGame(){
       walls: {
         
       },
+      boxes: {
+        
+      },
       destiny: {
          '1': { x: 24, y: 24 },
        },
@@ -79,6 +82,7 @@ export default function createGame(){
 
             if(player.y-1 >=0 && 
                wall(0,-1,player) && 
+               box(0,-1,player) && 
                win(0,-1,player) && 
                coin(0,-1,player) && 
                tp(0,-1,player) && 
@@ -91,6 +95,7 @@ export default function createGame(){
          ArrowRight(player){
             if(player.x+1<state.screen.width && 
                wall(+1,0,player) && 
+               box(+1,0,player) && 
                win(+1,0,player) && 
                coin(+1,0,player) && 
                tp(+1,0,player) && 
@@ -102,6 +107,7 @@ export default function createGame(){
          ArrowDown(player){
             if(player.y+1<state.screen.height && 
                wall(0,+1,player) && 
+               box(0,+1,player) && 
                win(0,+1,player) && 
                coin(0,+1,player) && 
                tp(0,+1,player) && 
@@ -113,6 +119,7 @@ export default function createGame(){
          ArrowLeft(player){
             if(player.x-1>=0 && 
                wall(-1,0,player) && 
+               box(-1,0,player) && 
                win(-1,0,player) && 
                coin(-1,0,player) && 
                tp(-1,0,player) && 
@@ -133,6 +140,11 @@ export default function createGame(){
          n(player){
             let cordenadas = {x: player.x, y: player.y}
             state.coins[contador] = cordenadas 
+            contador++
+         },
+         k(player){
+            let cordenadas = {x: player.x, y: player.y}
+            state.boxes[contador] = cordenadas 
             contador++
          },
          c(player){
@@ -199,6 +211,41 @@ export default function createGame(){
             result = false
          } else{}}
       return result
+   }
+   function canMoveTo(x, y, boxId){
+      if(x < 0 || y < 0 || x >= state.screen.width || y >= state.screen.height){
+         return false
+      }
+      for(const wallId in state.walls){
+         const wall = state.walls[wallId]
+         if(x == wall.x && y == wall.y) return false
+      }
+      for(const doorId in state.door){
+         const door = state.door[doorId]
+         if(x == door.x && y == door.y) return false
+      }
+      for(const numBoxId in state.boxes){
+         if(numBoxId == boxId) continue
+         const box = state.boxes[numBoxId]
+         if(x == box.x && y == box.y) return false
+      }
+      return true
+   }
+   function box(commandX, commandY, player){
+      const posFutureX = player.x + commandX
+      const posFutureY = player.y + commandY
+      for(const boxId in state.boxes){
+         const box = state.boxes[boxId]
+         if(posFutureX == box.x && posFutureY == box.y){
+            if(canMoveTo(posFutureX + commandX, posFutureY + commandY, boxId)){
+               box.x = posFutureX + commandX
+               box.y = posFutureY + commandY
+               return true
+            }
+            return false
+         }
+      }
+      return true
    }
    function win(commandX, commandY, player){
       const playerPos = player

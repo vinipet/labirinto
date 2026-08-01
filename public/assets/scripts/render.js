@@ -33,6 +33,12 @@ export default function renderScreen(screen, game, requestAnimationFrame, curren
       screen.fillStyle = 'white'
       screen.fillRect(rect.x, rect.y, rect.width, rect.height)
    }
+   for(const boxId in game.state.boxes){
+      const box = game.state.boxes[boxId]
+      const rect = tileToPixelRect(box)
+      screen.fillStyle = 'rgb(101, 67, 33)'
+      screen.fillRect(rect.x, rect.y, rect.width, rect.height)
+   }
    for(const doorId in game.state.door){
       const door = game.state.door[doorId]
       const rect = tileToPixelRect(door)

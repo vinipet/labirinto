@@ -18,6 +18,7 @@ describe('createGame', () => {
       expect(fresh.state.screen).toEqual({})
       expect(fresh.state.players).toEqual({})
       expect(fresh.state.walls).toEqual({})
+      expect(fresh.state.boxes).toEqual({})
       expect(fresh.state.coins).toEqual({})
       expect(fresh.state.tp).toEqual({})
     })
@@ -222,6 +223,82 @@ describe('createGame', () => {
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       expect(game.state.players['p1']).toEqual({ x: 6, y: 5 })
+    })
+  })
+
+  describe('boxes', () => {
+    it('should allow movement when no box is in the way', () => {
+      game.setState({ boxes: { box1: { x: 7, y: 5 } } })
+      game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.players['p1']).toEqual({ x: 6, y: 5 })
+    })
+
+    it('should push a box when the tile beyond is free', () => {
+      game.setState({ boxes: { box1: { x: 6, y: 5 } } })
+      game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.players['p1']).toEqual({ x: 6, y: 5 })
+      expect(game.state.boxes['box1']).toEqual({ x: 7, y: 5 })
+    })
+
+    it('should push a box multiple times in sequence', () => {
+      game.setState({ boxes: { box1: { x: 6, y: 5 } } })
+      game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.players['p1']).toEqual({ x: 8, y: 5 })
+      expect(game.state.boxes['box1']).toEqual({ x: 9, y: 5 })
+    })
+
+    it('should push a box vertically', () => {
+      game.setState({ boxes: { box1: { x: 5, y: 6 } } })
+      game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowDown' })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 6 })
+      expect(game.state.boxes['box1']).toEqual({ x: 5, y: 7 })
+    })
+
+    it('should block movement when a box cannot be pushed (wall behind)', () => {
+      game.setState({
+        walls: { wall1: { x: 7, y: 5 } },
+        boxes: { box1: { x: 6, y: 5 } },
+      })
+      game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5 })
+      expect(game.state.boxes['box1']).toEqual({ x: 6, y: 5 })
+    })
+
+    it('should block movement when another box is behind', () => {
+      game.setState({
+        boxes: {
+          box1: { x: 6, y: 5 },
+          box2: { x: 7, y: 5 },
+        },
+      })
+      game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5 })
+    })
+
+    it('should block movement when a box cannot be pushed (door behind)', () => {
+      game.setState({
+        door: { door1: { x: 7, y: 5 } },
+        boxes: { box1: { x: 6, y: 5 } },
+      })
+      game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5 })
+    })
+
+    it('should not push a box out of bounds', () => {
+      game.setState({ boxes: { box1: { x: 0, y: 5 } } })
+      game.addPlayer({ playerId: 'p1', playerX: 1, playerY: 5 })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowLeft' })
+      expect(game.state.players['p1']).toEqual({ x: 1, y: 5 })
+      expect(game.state.boxes['box1']).toEqual({ x: 0, y: 5 })
     })
   })
 
