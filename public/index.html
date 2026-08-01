@@ -11,36 +11,50 @@
    <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-   <p id="points"> voce tem mts ponto</p>
-   <canvas id="screen" width="25" height="25" ></canvas>
+   <div id="login-screen">
+      <h1>Labirinto</h1>
+      <button id="create-room">Criar sala</button>
+      <div class="login-join">
+         <input id="room-code-input" type="text" placeholder="codigo da sala" maxlength="5" autocomplete="off">
+         <button id="join-room">Entrar na sala</button>
+      </div>
+      <p id="login-error"></p>
+   </div>
 
-   <div id="controles">
-      
-      <button class="mov-control" data-direction="ArrowUp">
-          <span  class="material-symbols-outlined  seta" translate="no">
-             arrow_upward
-          </span> 
-       </button>
-       
-       <div class="lados">
-          <button class="mov-control" data-direction="ArrowLeft">
+   <div id="game-screen" class="hidden">
+      <p id="points"> voce tem mts ponto</p>
+      <p id="room-code-display"></p>
+      <canvas id="screen" width="25" height="25" ></canvas>
+
+      <div id="controles">
+         
+         <button class="mov-control" data-direction="ArrowUp">
              <span  class="material-symbols-outlined  seta" translate="no">
-                arrow_back
-             </span>
+                arrow_upward
+             </span> 
           </button>
           
-          <button class="mov-control" data-direction="ArrowRight">
+          <div class="lados">
+             <button class="mov-control" data-direction="ArrowLeft">
+                <span  class="material-symbols-outlined  seta" translate="no">
+                   arrow_back
+                </span>
+             </button>
+             
+             <button class="mov-control" data-direction="ArrowRight">
+                <span  class="material-symbols-outlined  seta" translate="no">
+                arrow_right_alt
+             </span>
+             </button>
+          </div>
+          
+          <button class="mov-control" data-direction="ArrowDown">
              <span  class="material-symbols-outlined  seta" translate="no">
-             arrow_right_alt
-          </span>
+                arrow_downward
+             </span>
           </button>
-       </div>
-       
-       <button class="mov-control" data-direction="ArrowDown">
-          <span  class="material-symbols-outlined  seta" translate="no">
-             arrow_downward
-          </span>
-       </button>
+
+      </div>
 
    </div>
 
@@ -54,27 +68,56 @@ const canvaElement = document.getElementById('screen')
 const screen = canvaElement.getContext('2d')
 const keyboardListener = createKeyboardListener(document);
 
+const loginScreen = document.getElementById('login-screen')
+const gameScreen = document.getElementById('game-screen')
+const roomCodeDisplay = document.getElementById('room-code-display')
+const loginError = document.getElementById('login-error')
+const roomCodeInput = document.getElementById('room-code-input')
+
 const socket = io()
 
-socket.on('connect', () => {
-   const playerId = socket.id
-   renderScreen(screen,game,requestAnimationFrame, playerId )
+let rendering = false
+
+document.getElementById('create-room').addEventListener('click', () => {
+   socket.emit('create-room')
 })
 
-socket.on('setup', (state)=>{
+document.getElementById('join-room').addEventListener('click', () => {
+   const code = roomCodeInput.value.trim().toUpperCase()
+   if(!code) return
+   socket.emit('join-room', { code })
+})
+
+roomCodeInput.addEventListener('keydown', (event) => {
+   if(event.key === 'Enter'){
+      document.getElementById('join-room').click()
+   }
+})
+
+socket.on('setup', ({ code, state }) => {
    const playerId = socket.id
    game.setState(state)
-   
+   roomCodeDisplay.textContent = `Sala: ${code}`
+   loginScreen.classList.add('hidden')
+   gameScreen.classList.remove('hidden')
+
    keyboardListener.registerPlayerId(playerId)
    keyboardListener.subscribe(game.movePlayer)
    keyboardListener.subscribe((command)=>{
       socket.emit('move-player', command)
    })
-   
+
+   if(!rendering){
+      renderScreen(screen, game, requestAnimationFrame, playerId)
+      rendering = true
+   }
+})
+
+socket.on('room-not-found', ({ code }) => {
+   loginError.textContent = `sala ${code} nao encontrada`
 })
 
 socket.on('add-player', (command)=>{
-   // console.log(`> receiving ${command.type} --> ${command.playerId}`)
    game.addPlayer(command)
 })
 
@@ -84,7 +127,6 @@ socket.on('remove-player', (command)=>{
 })
 
 socket.on('move-player', (command)=>{
-   // console.log(`> receiving ${command.type} --> ${command.playerId}`)
    const playerId = socket.id
    
    if(playerId !== command.playerId){

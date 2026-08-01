@@ -1,0 +1,60 @@
+export default function handleConnection(socket, { roomManager, broadcast }) {
+   const playerId = socket.id
+   console.log(`> player conected on id ${playerId}`)
+
+   socket.on('create-room', () => {
+      const { code, game } = roomManager.createRoom()
+
+      game.subscribe((command) => {
+         console.log(`> emitting ${command.type} in room ${code}`)
+         broadcast(code, command.type, command)
+      })
+
+      socket.join(code)
+      socket.gameRoom = code
+      game.addPlayer({playerId:playerId, playerX:12,playerY:0})
+
+      socket.emit('setup', { code, state: game.state })
+   })
+
+   socket.on('join-room', (command) => {
+      const code = String(command.code || '').trim().toUpperCase()
+      const game = roomManager.getRoom(code)
+
+      if(!game){
+         socket.emit('room-not-found', { code })
+         return
+      }
+
+      socket.join(code)
+      socket.gameRoom = code
+      game.addPlayer({playerId:playerId, playerX:12,playerY:0})
+
+      socket.emit('setup', { code, state: game.state })
+   })
+
+   socket.on('disconnect', () => {
+      const code = socket.gameRoom
+      if(!code) return
+      const game = roomManager.getRoom(code)
+      if(!game) return
+
+      game.removePlayer({playerId:playerId})
+
+      if(Object.keys(game.state.players).length === 0){
+         roomManager.deleteRoom(code)
+         console.log(`> sala ${code} deletada`)
+      }
+   })
+
+   socket.on('move-player', (command)=>{
+      const code = socket.gameRoom
+      if(!code) return
+      const game = roomManager.getRoom(code)
+      if(!game) return
+
+      command.playerId = playerId
+      command.type = 'move-player'
+      game.movePlayer(command)
+   })
+}

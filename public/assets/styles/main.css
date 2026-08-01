@@ -129,6 +129,63 @@ span.seta{
    left: 15px;
 }
 
+.hidden{
+   display: none !important;
+}
+
+#login-screen{
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   gap: 20px;
+   background-color: rgb(125, 173, 119);
+   border: 5px solid rgb(55, 75, 51);
+   border-radius: 10px;
+   padding: 40px;
+}
+
+#login-screen button{
+   padding: 12px 24px;
+   font-size: 18px;
+   border: none;
+   border-radius: 5px;
+   background-color: rgb(55, 75, 51);
+   color: white;
+   cursor: pointer;
+}
+
+.login-join{
+   display: flex;
+   flex-direction: column;
+   gap: 10px;
+}
+
+#room-code-input{
+   padding: 10px;
+   font-size: 20px;
+   text-align: center;
+   text-transform: uppercase;
+   border: none;
+   border-radius: 5px;
+}
+
+#login-error{
+   color: #7a1c1c;
+   min-height: 1em;
+}
+
+#room-code-display{
+   position: fixed;
+   top: 15px;
+   right: 15px;
+   background-color: rgba(0, 0, 0, 0.6);
+   color: white;
+   padding: 8px 12px;
+   border-radius: 6px;
+   z-index: 10;
+   text-transform: uppercase;
+}
+
 @media (max-width : 466px) {
    section{
    margin-top: 10vh;
