@@ -338,17 +338,47 @@ describe('createGame', () => {
       expect(game.state.door['door2']).toEqual({ x: 10, y: 10 })
     })
 
-    it('BUG: plate deletes entire state.plate instead of one entry, crashing on multi-plate maps', () => {
+    it('only removes the pressed plate and its door, keeping others', () => {
       game.setState({
+        door: {
+          door1: { x: 6, y: 5 },
+          door2: { x: 10, y: 10 },
+        },
         plate: {
           plate1: { x: 3, y: 3, door: 'door1' },
           plate2: { x: 5, y: 5, door: 'door2' },
         },
       })
       game.addPlayer({ playerId: 'p1', playerX: 2, playerY: 3 })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.door['door1']).toBeUndefined()
+      expect(game.state.door['door2']).toEqual({ x: 10, y: 10 })
+      expect(game.state.plate['plate1']).toBeUndefined()
+      expect(game.state.plate['plate2']).toEqual({ x: 5, y: 5, door: 'door2' })
+    })
+
+    it('opens a door referenced by object when its plate is pressed', () => {
+      const doorObj = { x: 6, y: 5 }
+      game.setState({
+        door: {
+          door1: doorObj,
+          door2: { x: 10, y: 10 },
+        },
+        plate: { plate1: { x: 3, y: 3, door: doorObj } },
+      })
+      game.addPlayer({ playerId: 'p1', playerX: 2, playerY: 3 })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.door['door1']).toBeUndefined()
+      expect(game.state.door['door2']).toEqual({ x: 10, y: 10 })
+    })
+
+    it('does not crash when pressing a plate without a linked door', () => {
+      game.setState({ plate: { plate1: { x: 3, y: 3 } } })
+      game.addPlayer({ playerId: 'p1', playerX: 2, playerY: 3 })
       expect(() => {
         game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      }).toThrow()
+      }).not.toThrow()
+      expect(game.state.plate['plate1']).toBeUndefined()
     })
   })
 

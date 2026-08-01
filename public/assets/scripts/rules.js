@@ -6,14 +6,17 @@ export default function createGame(){
 
       },
       door:{
-      },
+         door1: { x: 12, y: 9 },
+       },
       plate:{
-      },
+         plate1: { x: 12, y: 1, door: 'door1' },
+       },
       walls: {
         
       },
       destiny: {
-      },
+         '1': { x: 24, y: 24 },
+       },
       coins: {
    
       },
@@ -251,18 +254,33 @@ export default function createGame(){
          } else{}}
       return result
    }
+   function findDoorId(doorRef){
+      if(typeof doorRef === 'string'){
+         return doorRef in state.door ? doorRef : null
+      }
+      if(doorRef && typeof doorRef.x === 'number' && typeof doorRef.y === 'number'){
+         for(const doorId in state.door){
+            const door = state.door[doorId]
+            if(door.x === doorRef.x && door.y === doorRef.y){
+               return doorId
+            }
+         }
+      }
+      return null
+   }
    function plate(commandX, commandY, player){
       const playerPos = player
       const posFutureX = playerPos.x + commandX
       const posFutureY = playerPos.y + commandY
       
-      for(let plateId in state.plate){
-         let plate = state.plate[plateId]
+      for(const plateId in state.plate){
+         const plate = state.plate[plateId]
          if(posFutureX == plate.x && posFutureY == plate.y){ 
-            const door = plate.door
-            console.log(door)
-            delete state.door[door]
-            delete state.plate
+            const doorId = findDoorId(plate.door)
+            if(doorId !== null){
+               delete state.door[doorId]
+            }
+            delete state.plate[plateId]
          }}
       return true
    }
