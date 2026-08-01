@@ -13,10 +13,11 @@
 <body>
    <div id="login-screen">
       <h1>Labirinto</h1>
-      <button id="create-room">Criar sala</button>
+      <button id="new-game">Novo jogo</button>
+      <button id="host-game">Hostear jogo</button>
       <div class="login-join">
          <input id="room-code-input" type="text" placeholder="codigo da sala" maxlength="5" autocomplete="off">
-         <button id="join-room">Entrar na sala</button>
+         <button id="join-room">Entrar em um jogo</button>
       </div>
       <p id="login-error"></p>
    </div>
@@ -78,8 +79,12 @@ const socket = io()
 
 let rendering = false
 
-document.getElementById('create-room').addEventListener('click', () => {
-   socket.emit('create-room')
+document.getElementById('new-game').addEventListener('click', () => {
+   socket.emit('create-room', { mode: 'single' })
+})
+
+document.getElementById('host-game').addEventListener('click', () => {
+   socket.emit('create-room', { mode: 'online' })
 })
 
 document.getElementById('join-room').addEventListener('click', () => {
@@ -97,7 +102,8 @@ roomCodeInput.addEventListener('keydown', (event) => {
 socket.on('setup', ({ code, state }) => {
    const playerId = socket.id
    game.setState(state)
-   roomCodeDisplay.textContent = `Sala: ${code}`
+   roomCodeDisplay.textContent = state.mode === 'single' ? '' : `Sala: ${code}`
+   roomCodeDisplay.style.display = state.mode === 'single' ? 'none' : 'block'
    loginScreen.classList.add('hidden')
    gameScreen.classList.remove('hidden')
 

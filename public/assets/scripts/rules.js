@@ -1,6 +1,7 @@
 export default function createGame(){
    let state = {
       pontos: 0,
+      mode: 'online',
       screen:{},
       players: {
 

@@ -60,4 +60,16 @@ describe('createRoomManager', () => {
     expect(manager.deleteRoom(code)).toBe(true)
     expect(manager.hasRoom(code)).toBe(false)
   })
+
+  it('defaults to online mode', () => {
+    const manager = createRoomManager()
+    const { game } = manager.createRoom()
+    expect(game.state.mode).toBe('online')
+  })
+
+  it('sets single mode when requested', () => {
+    const manager = createRoomManager()
+    const { game } = manager.createRoom('single')
+    expect(game.state.mode).toBe('single')
+  })
 })

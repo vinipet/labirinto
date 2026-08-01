@@ -2,8 +2,9 @@ export default function handleConnection(socket, { roomManager, broadcast }) {
    const playerId = socket.id
    console.log(`> player conected on id ${playerId}`)
 
-   socket.on('create-room', () => {
-      const { code, game } = roomManager.createRoom()
+   socket.on('create-room', (command = {}) => {
+      const mode = command.mode === 'single' ? 'single' : 'online'
+      const { code, game } = roomManager.createRoom(mode)
 
       game.subscribe((command) => {
          console.log(`> emitting ${command.type} in room ${code}`)
@@ -21,7 +22,7 @@ export default function handleConnection(socket, { roomManager, broadcast }) {
       const code = String(command.code || '').trim().toUpperCase()
       const game = roomManager.getRoom(code)
 
-      if(!game){
+      if(!game || game.state.mode === 'single'){
          socket.emit('room-not-found', { code })
          return
       }

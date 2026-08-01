@@ -19,10 +19,11 @@ export function createRoomManager() {
    const rooms = new Map()
 
    return {
-      createRoom() {
+      createRoom(mode = 'online') {
          const code = generateRoomCode(new Set(rooms.keys()))
          const game = CreateGame()
          game.setState(structuredClone(mundo))
+         game.state.mode = mode
          rooms.set(code, game)
          return { code, game }
       },

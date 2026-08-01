@@ -100,6 +100,31 @@ describe('handleConnection', () => {
       expect(findSetup(socketB).payload.code).toBe(code)
    })
 
+   it('creates a single mode room when requested', () => {
+      socketA.fire('create-room', { mode: 'single' })
+
+      const setup = findSetup(socketA)
+      expect(setup.payload.state.mode).toBe('single')
+   })
+
+   it('creates an online mode room by default', () => {
+      socketA.fire('create-room')
+
+      const setup = findSetup(socketA)
+      expect(setup.payload.state.mode).toBe('online')
+   })
+
+   it('blocks joining a single player room', () => {
+      socketA.fire('create-room', { mode: 'single' })
+      const code = findSetup(socketA).payload.code
+
+      socketB.fire('join-room', { code })
+
+      const notFound = socketB.emitted.find((e) => e.event === 'room-not-found')
+      expect(notFound).toBeDefined()
+      expect(socketB.rooms.has(code)).toBe(false)
+   })
+
    it('reports room-not-found for an invalid code', () => {
       socketA.fire('join-room', { code: 'ZZZZZ' })
 

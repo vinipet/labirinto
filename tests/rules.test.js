@@ -15,6 +15,7 @@ describe('createGame', () => {
     it('should have default values on creation', () => {
       const fresh = createGame()
       expect(fresh.state.pontos).toBe(0)
+      expect(fresh.state.mode).toBe('online')
       expect(fresh.state.screen).toEqual({})
       expect(fresh.state.players).toEqual({})
       expect(fresh.state.walls).toEqual({})
