@@ -16,7 +16,7 @@ O projeto ainda está em desenvolvimento e as próximas atualizações serão vo
 - [x] tornar responsivel
 - [x] viabilizar o game em dispositivos moveis
 - [ ] Adicionar um modo de criar mapas
-- [ ] add chaves e portas
+- [x] add chaves e portas
 - [ ] add sistema de combate (melle / bombas)
 - [ ] add armadilha
 - [x] caixas

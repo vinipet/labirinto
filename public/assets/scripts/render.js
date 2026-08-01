@@ -45,6 +45,12 @@ export default function renderScreen(screen, game, requestAnimationFrame, curren
       screen.fillStyle = '#a5c9ca'
       screen.fillRect(rect.x, rect.y, rect.width, rect.height)
    }
+   for(const keydoorId in game.state.keydoor){
+      const keydoor = game.state.keydoor[keydoorId]
+      const rect = tileToPixelRect(keydoor)
+      screen.fillStyle = 'rgb(128, 0, 128)'
+      screen.fillRect(rect.x, rect.y, rect.width, rect.height)
+   }
    for(const plateId in game.state.plate){
       const plate = game.state.plate[plateId]
       const rect = tileToPixelRect(plate)
@@ -61,6 +67,12 @@ export default function renderScreen(screen, game, requestAnimationFrame, curren
       const coin = game.state.coins[coinId]
       const rect = tileToPixelRect(coin)
       screen.fillStyle = 'rgb(173, 173, 22)'
+      screen.fillRect(rect.x, rect.y, rect.width, rect.height)
+   }
+   for(const keyId in game.state.keys){
+      const key = game.state.keys[keyId]
+      const rect = tileToPixelRect(key)
+      screen.fillStyle = 'rgb(255, 215, 0)'
       screen.fillRect(rect.x, rect.y, rect.width, rect.height)
    }
    for(const tpId in game.state.tp){

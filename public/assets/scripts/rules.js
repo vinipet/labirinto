@@ -11,6 +11,15 @@ export default function createGame(){
       plate:{
          plate1: { x: 12, y: 1, door: 'door1' },
        },
+      keydoor: {
+        
+      },
+      keys: {
+        
+      },
+      inventory: {
+        
+      },
       walls: {
         
       },
@@ -85,8 +94,10 @@ export default function createGame(){
                box(0,-1,player) && 
                win(0,-1,player) && 
                coin(0,-1,player) && 
+               key(0,-1,player) && 
                tp(0,-1,player) && 
                door(0,-1,player) && 
+               keydoor(0,-1,player) && 
                plate(0,-1,player) ){
 
                player.y = player.y-1
@@ -98,8 +109,10 @@ export default function createGame(){
                box(+1,0,player) && 
                win(+1,0,player) && 
                coin(+1,0,player) && 
+               key(+1,0,player) && 
                tp(+1,0,player) && 
                door(+1,0,player) && 
+               keydoor(+1,0,player) && 
                plate(+1,0,player)){
                player.x =player.x+1
             }
@@ -110,8 +123,10 @@ export default function createGame(){
                box(0,+1,player) && 
                win(0,+1,player) && 
                coin(0,+1,player) && 
+               key(0,+1,player) && 
                tp(0,+1,player) && 
                door(0,+1,player) && 
+               keydoor(0,+1,player) && 
                plate(0,+1,player)){
                player.y=player.y+1
             }
@@ -122,8 +137,10 @@ export default function createGame(){
                box(-1,0,player) && 
                win(-1,0,player) && 
                coin(-1,0,player) && 
+               key(-1,0,player) && 
                tp(-1,0,player) && 
                door(-1,0,player) && 
+               keydoor(-1,0,player) && 
                plate(-1,0,player)){
                player.x=player.x-1
             }
@@ -145,6 +162,16 @@ export default function createGame(){
          k(player){
             let cordenadas = {x: player.x, y: player.y}
             state.boxes[contador] = cordenadas 
+            contador++
+         },
+         y(player){
+            let cordenadas = {x: player.x, y: player.y}
+            state.keys[contador] = cordenadas 
+            contador++
+         },
+         l(player){
+            let cordenadas = {x: player.x, y: player.y}
+            state.keydoor[contador] = cordenadas 
             contador++
          },
          c(player){
@@ -224,6 +251,10 @@ export default function createGame(){
          const door = state.door[doorId]
          if(x == door.x && y == door.y) return false
       }
+      for(const keydoorId in state.keydoor){
+         const keydoor = state.keydoor[keydoorId]
+         if(x == keydoor.x && y == keydoor.y) return false
+      }
       for(const numBoxId in state.boxes){
          if(numBoxId == boxId) continue
          const box = state.boxes[numBoxId]
@@ -273,6 +304,43 @@ export default function createGame(){
             coin.y = -1
          } else{}}
       return result
+   }
+   function findPlayerId(player){
+      for(const playerId in state.players){
+         if(state.players[playerId] === player) return playerId
+      }
+      return null
+   }
+   function key(commandX, commandY, player){
+      const posFutureX = player.x + commandX
+      const posFutureY = player.y + commandY
+      for(const keyId in state.keys){
+         const key = state.keys[keyId]
+         if(posFutureX == key.x && posFutureY == key.y){
+            const playerId = findPlayerId(player)
+            if(playerId){
+               state.inventory[playerId] = (state.inventory[playerId] || 0) + 1
+            }
+            key.x = -1
+            key.y = -1
+         }}
+      return true
+   }
+   function keydoor(commandX, commandY, player){
+      const posFutureX = player.x + commandX
+      const posFutureY = player.y + commandY
+      for(const keydoorId in state.keydoor){
+         const keydoor = state.keydoor[keydoorId]
+         if(posFutureX == keydoor.x && posFutureY == keydoor.y){
+            const playerId = findPlayerId(player)
+            if(playerId && (state.inventory[playerId] || 0) > 0){
+               state.inventory[playerId] -= 1
+               delete state.keydoor[keydoorId]
+               return true
+            }
+            return false
+         }}
+      return true
    }
    function tp(commandX, commandY, player){
       const playerPos = player

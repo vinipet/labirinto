@@ -19,6 +19,9 @@ describe('createGame', () => {
       expect(fresh.state.players).toEqual({})
       expect(fresh.state.walls).toEqual({})
       expect(fresh.state.boxes).toEqual({})
+      expect(fresh.state.keys).toEqual({})
+      expect(fresh.state.keydoor).toEqual({})
+      expect(fresh.state.inventory).toEqual({})
       expect(fresh.state.coins).toEqual({})
       expect(fresh.state.tp).toEqual({})
     })
@@ -299,6 +302,73 @@ describe('createGame', () => {
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowLeft' })
       expect(game.state.players['p1']).toEqual({ x: 1, y: 5 })
       expect(game.state.boxes['box1']).toEqual({ x: 0, y: 5 })
+    })
+  })
+
+  describe('keys and keydoors', () => {
+    it('should collect a key when stepping on it', () => {
+      game.setState({ keys: { key1: { x: 6, y: 5 } } })
+      game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.inventory['p1']).toBe(1)
+      expect(game.state.keys['key1']).toEqual({ x: -1, y: -1 })
+    })
+
+    it('should accumulate multiple keys', () => {
+      game.setState({
+        keys: {
+          key1: { x: 6, y: 5 },
+          key2: { x: 6, y: 6 },
+        },
+      })
+      game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowDown' })
+      expect(game.state.inventory['p1']).toBe(2)
+    })
+
+    it('should keep keys per player', () => {
+      game.setState({ keys: { key1: { x: 6, y: 5 } } })
+      game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
+      game.addPlayer({ playerId: 'p2', playerX: 20, playerY: 20 })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.inventory['p1']).toBe(1)
+      expect(game.state.inventory['p2']).toBeUndefined()
+    })
+
+    it('should block movement through a keydoor without a key', () => {
+      game.setState({ keydoor: { kd1: { x: 6, y: 5 } } })
+      game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5 })
+      expect(game.state.keydoor['kd1']).toEqual({ x: 6, y: 5 })
+    })
+
+    it('should open a keydoor and consume a key when the player has one', () => {
+      game.setState({
+        keydoor: { kd1: { x: 6, y: 5 } },
+        keys: { key1: { x: 3, y: 5 } },
+      })
+      game.addPlayer({ playerId: 'p1', playerX: 2, playerY: 5 })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.inventory['p1']).toBe(1)
+
+      game.setState({ players: { p1: { x: 5, y: 5 } } })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.players['p1']).toEqual({ x: 6, y: 5 })
+      expect(game.state.keydoor['kd1']).toBeUndefined()
+      expect(game.state.inventory['p1']).toBe(0)
+    })
+
+    it('should not use a key when a keydoor is not reached', () => {
+      game.setState({
+        keydoor: { kd1: { x: 6, y: 5 } },
+        keys: { key1: { x: 3, y: 5 } },
+      })
+      game.addPlayer({ playerId: 'p1', playerX: 2, playerY: 5 })
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.inventory['p1']).toBe(1)
+      expect(game.state.keydoor['kd1']).toEqual({ x: 6, y: 5 })
     })
   })
 
