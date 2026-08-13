@@ -60,12 +60,16 @@ export default function createGame(){
           x: playerX,
           y: playerY
       }
+      if(command.name){
+         state.players[playerId].name = command.name
+      }
 
       notifyAll({
           type: 'add-player',
           playerId: playerId,
           playerX: playerX,
-          playerY: playerY
+          playerY: playerY,
+          name: command.name || ''
       })
    }
 

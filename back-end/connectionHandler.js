@@ -2,9 +2,13 @@ export default function handleConnection(socket, { roomManager, broadcast }) {
    const playerId = socket.id
    console.log(`> player conected on id ${playerId}`)
 
+   function getName(command) {
+      return typeof command?.name === 'string' ? command.name.trim() : ''
+   }
+
    socket.on('create-room', (command = {}) => {
       const mode = command.mode === 'single' ? 'single' : 'online'
-      const { code, game } = roomManager.createRoom(mode)
+      const { code, game } = roomManager.createRoom(mode, command.map)
 
       game.subscribe((command) => {
          console.log(`> emitting ${command.type} in room ${code}`)
@@ -13,7 +17,8 @@ export default function handleConnection(socket, { roomManager, broadcast }) {
 
       socket.join(code)
       socket.gameRoom = code
-      game.addPlayer({playerId:playerId, playerX:12,playerY:0})
+      const spawn = game.state.spawn || { x: 12, y: 0 }
+      game.addPlayer({ playerId, playerX: spawn.x, playerY: spawn.y, name: getName(command) })
 
       socket.emit('setup', { code, state: game.state })
    })
@@ -29,7 +34,8 @@ export default function handleConnection(socket, { roomManager, broadcast }) {
 
       socket.join(code)
       socket.gameRoom = code
-      game.addPlayer({playerId:playerId, playerX:12,playerY:0})
+      const spawn = game.state.spawn || { x: 12, y: 0 }
+      game.addPlayer({ playerId, playerX: spawn.x, playerY: spawn.y, name: getName(command) })
 
       socket.emit('setup', { code, state: game.state })
    })

@@ -1,13 +1,17 @@
 import Express  from "express";
 import http from 'http'
 import {Server} from 'socket.io'
-import { createRoomManager } from './roomManager.js'
+import { createRoomManager, getWorldList } from './roomManager.js'
 import handleConnection from './connectionHandler.js'
 
 const app = Express()
 const server = http.createServer(app)
 const sockets = new Server(server)
 app.use(Express.static('public'))
+
+app.get('/api/worlds', (req, res) => {
+   res.json(getWorldList())
+})
 
 const roomManager = createRoomManager()
 

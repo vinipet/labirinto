@@ -169,6 +169,55 @@ span.seta{
    border-radius: 5px;
 }
 
+#name-input{
+   padding: 10px;
+   font-size: 20px;
+   text-align: center;
+   border: none;
+   border-radius: 5px;
+   width: 100%;
+}
+
+#map-select{
+   padding: 10px;
+   font-size: 20px;
+   text-align: center;
+   border: none;
+   border-radius: 5px;
+   width: 100%;
+   cursor: pointer;
+}
+
+#map-preview{
+   width: 200px;
+   height: 200px;
+   min-width: 200px;
+   max-width: 200px;
+   border: 3px solid rgb(55, 75, 51);
+   border-radius: 5px;
+   background-color: white;
+}
+
+#leave-game{
+   position: fixed;
+   top: 50px;
+   right: 15px;
+   z-index: 10;
+   background-color: rgb(55, 75, 51);
+   color: white;
+   border: none;
+   border-radius: 5px;
+   padding: 8px 14px;
+   cursor: pointer;
+   font-size: 16px;
+}
+
+#player-name-display{
+   position: fixed;
+   top: 50px;
+   left: 15px;
+}
+
 #login-error{
    color: #7a1c1c;
    min-height: 1em;

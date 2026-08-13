@@ -1,11 +1,34 @@
 export const TILE_SIZE = 16
 
-export function tileToPixelRect(tile) {
+export function tileToPixelRect(tile, scale = 1) {
    return {
-      x: tile.x * TILE_SIZE,
-      y: tile.y * TILE_SIZE,
-      width: TILE_SIZE,
-      height: TILE_SIZE
+      x: tile.x * TILE_SIZE * scale,
+      y: tile.y * TILE_SIZE * scale,
+      width: TILE_SIZE * scale,
+      height: TILE_SIZE * scale
+   }
+}
+
+const LAYERS = [
+   { key: 'walls', color: 'white' },
+   { key: 'boxes', color: 'rgb(101, 67, 33)' },
+   { key: 'door', color: '#a5c9ca' },
+   { key: 'keydoor', color: 'rgb(128, 0, 128)' },
+   { key: 'plate', color: '#808080' },
+   { key: 'destiny', color: 'green' },
+   { key: 'coins', color: 'rgb(173, 173, 22)' },
+   { key: 'keys', color: 'rgb(255, 215, 0)' },
+   { key: 'tp', color: 'brown' },
+]
+
+export function drawTiles(screen, state, scale = 1, colors = {}) {
+   for (const layer of LAYERS) {
+      screen.fillStyle = colors[layer.key] || layer.color
+      for (const tileId in state[layer.key]) {
+         const tile = state[layer.key][tileId]
+         const rect = tileToPixelRect(tile, scale)
+         screen.fillRect(rect.x, rect.y, rect.width, rect.height)
+      }
    }
 }
 
@@ -26,66 +49,23 @@ export default function renderScreen(screen, game, requestAnimationFrame, curren
 
    screen.fillStyle = 'white'
    screen.clearRect(0,0,canvas.width,canvas.height)
-   
-   for(const wallId in game.state.walls){
-      const wall = game.state.walls[wallId]
-      const rect = tileToPixelRect(wall)
-      screen.fillStyle = 'white'
-      screen.fillRect(rect.x, rect.y, rect.width, rect.height)
-   }
-   for(const boxId in game.state.boxes){
-      const box = game.state.boxes[boxId]
-      const rect = tileToPixelRect(box)
-      screen.fillStyle = 'rgb(101, 67, 33)'
-      screen.fillRect(rect.x, rect.y, rect.width, rect.height)
-   }
-   for(const doorId in game.state.door){
-      const door = game.state.door[doorId]
-      const rect = tileToPixelRect(door)
-      screen.fillStyle = '#a5c9ca'
-      screen.fillRect(rect.x, rect.y, rect.width, rect.height)
-   }
-   for(const keydoorId in game.state.keydoor){
-      const keydoor = game.state.keydoor[keydoorId]
-      const rect = tileToPixelRect(keydoor)
-      screen.fillStyle = 'rgb(128, 0, 128)'
-      screen.fillRect(rect.x, rect.y, rect.width, rect.height)
-   }
-   for(const plateId in game.state.plate){
-      const plate = game.state.plate[plateId]
-      const rect = tileToPixelRect(plate)
-      screen.fillStyle = '#808080'
-      screen.fillRect(rect.x, rect.y, rect.width, rect.height)
-   }
-   for(const destinyId in game.state.destiny){
-      const destiny = game.state.destiny[destinyId]
-      const rect = tileToPixelRect(destiny)
-      screen.fillStyle = 'green'
-      screen.fillRect(rect.x, rect.y, rect.width, rect.height)
-   }
-   for(const coinId in game.state.coins){
-      const coin = game.state.coins[coinId]
-      const rect = tileToPixelRect(coin)
-      screen.fillStyle = 'rgb(173, 173, 22)'
-      screen.fillRect(rect.x, rect.y, rect.width, rect.height)
-   }
-   for(const keyId in game.state.keys){
-      const key = game.state.keys[keyId]
-      const rect = tileToPixelRect(key)
-      screen.fillStyle = 'rgb(255, 215, 0)'
-      screen.fillRect(rect.x, rect.y, rect.width, rect.height)
-   }
-   for(const tpId in game.state.tp){
-      const tp = game.state.tp[tpId]
-      const rect = tileToPixelRect(tp)
-      screen.fillStyle = 'brown'
-      screen.fillRect(rect.x, rect.y, rect.width, rect.height)
-   }
+
+   drawTiles(screen, game.state)
+
    for(const playerId in game.state.players){
       const player = game.state.players[playerId]
       const rect = tileToPixelRect(player)
       screen.fillStyle = 'blue'
       screen.fillRect(rect.x, rect.y, rect.width, rect.height)
+      if(player.name){
+         screen.save()
+         screen.globalCompositeOperation = 'difference'
+         screen.fillStyle = 'white'
+         screen.font = 'bold 8px monospace'
+         screen.textAlign = 'center'
+         screen.fillText(player.name, rect.x + rect.width / 2, rect.y - 2)
+         screen.restore()
+      }
    }
 
    const currentPlayer = game.state.players[currentPlayerId]

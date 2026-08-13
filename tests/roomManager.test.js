@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { generateRoomCode, createRoomManager } from '../back-end/roomManager.js'
+import { generateRoomCode, createRoomManager, worldMaps, getWorldMap, getWorldList } from '../back-end/roomManager.js'
 
 describe('generateRoomCode', () => {
   it('returns a code of 5 uppercase alphanumeric chars', () => {
@@ -71,5 +71,70 @@ describe('createRoomManager', () => {
     const manager = createRoomManager()
     const { game } = manager.createRoom('single')
     expect(game.state.mode).toBe('single')
+  })
+})
+
+describe('worldMaps', () => {
+  it('exposes six playable maps', () => {
+    expect(Object.keys(worldMaps)).toHaveLength(6)
+    for (const world of Object.values(worldMaps)) {
+      expect(world.name).toBeDefined()
+      expect(world.spawn.x).toBeDefined()
+      expect(world.spawn.y).toBeDefined()
+    }
+  })
+
+  it('gets a world by id', () => {
+    expect(getWorldMap('world1').state.screen).toEqual({ width: 50, height: 50 })
+    expect(getWorldMap('world3').state.screen).toEqual({ width: 25, height: 25 })
+  })
+
+  it('falls back to world3 for unknown ids', () => {
+    expect(getWorldMap('mapa-inexistente')).toBe(worldMaps.world3)
+  })
+
+  it('loads the requested map when creating a room', () => {
+    const manager = createRoomManager()
+    const { game } = manager.createRoom('online', 'world1')
+    expect(game.state.screen).toEqual({ width: 50, height: 50 })
+    expect(game.state.spawn).toEqual({ x: 25, y: 43 })
+  })
+
+  it('defaults to world3 when no map is specified', () => {
+    const manager = createRoomManager()
+    const { game } = manager.createRoom()
+    expect(game.state.screen).toEqual({ width: 25, height: 25 })
+    expect(game.state.spawn).toEqual({ x: 12, y: 0 })
+  })
+
+  it('falls back to world3 for unknown maps', () => {
+    const manager = createRoomManager()
+    const { game } = manager.createRoom('online', 'mapa-inexistente')
+    expect(game.state.screen).toEqual({ width: 25, height: 25 })
+  })
+
+  it('keeps spawn points independent between rooms', () => {
+    const manager = createRoomManager()
+    const roomA = manager.createRoom('online', 'world1')
+    const roomB = manager.createRoom('online', 'world3')
+    roomA.game.state.spawn.x = 999
+    expect(roomB.game.state.spawn).toEqual({ x: 12, y: 0 })
+  })
+})
+
+describe('getWorldList', () => {
+  it('returns one entry per world with id and name', () => {
+    const worlds = getWorldList()
+    expect(worlds).toHaveLength(6)
+    for (const world of worlds) {
+      expect(typeof world.id).toBe('string')
+      expect(typeof world.name).toBe('string')
+    }
+  })
+
+  it('exposes the state used to render the preview', () => {
+    const worlds = getWorldList()
+    const world1 = worlds.find(w => w.id === 'world1')
+    expect(world1.state.screen).toEqual({ width: 50, height: 50 })
   })
 })

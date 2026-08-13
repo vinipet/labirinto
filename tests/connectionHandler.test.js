@@ -134,6 +134,44 @@ describe('handleConnection', () => {
       expect(socketA.gameRoom).toBeNull()
    })
 
+   it('stores the chosen map and its spawn point', () => {
+      socketA.fire('create-room', { mode: 'online', map: 'world1' })
+
+      const setup = findSetup(socketA)
+      expect(setup.payload.state.screen).toEqual({ width: 50, height: 50 })
+      expect(setup.payload.state.players['playerA']).toMatchObject({ x: 25, y: 43 })
+   })
+
+   it('stores the player name on create', () => {
+      socketA.fire('create-room', { mode: 'online', name: 'Maria' })
+
+      const setup = findSetup(socketA)
+      expect(setup.payload.state.players['playerA'].name).toBe('Maria')
+   })
+
+   it('stores the player name on join', () => {
+      socketA.fire('create-room', { mode: 'online', name: 'Maria' })
+      const code = findSetup(socketA).payload.code
+
+      socketB.fire('join-room', { code, name: 'Joao' })
+
+      expect(roomManager.getRoom(code).state.players['playerB'].name).toBe('Joao')
+   })
+
+   it('trims the player name', () => {
+      socketA.fire('create-room', { mode: 'online', name: '  Ana  ' })
+
+      const setup = findSetup(socketA)
+      expect(setup.payload.state.players['playerA'].name).toBe('Ana')
+   })
+
+   it('defaults to no name when not provided', () => {
+      socketA.fire('create-room', { mode: 'online' })
+
+      const setup = findSetup(socketA)
+      expect(setup.payload.state.players['playerA'].name).toBeUndefined()
+   })
+
    it('routes move-player to the correct room game', () => {
       socketA.fire('create-room')
       const code = findSetup(socketA).payload.code

@@ -13,6 +13,16 @@
 <body>
    <div id="login-screen">
       <h1>Labirinto</h1>
+      <input id="name-input" type="text" placeholder="seu nome" maxlength="12" autocomplete="off">
+      <select id="map-select">
+         <option value="world1">Mundo 1</option>
+         <option value="world2">Mundo 2</option>
+         <option value="world3" selected>Mundo 3</option>
+         <option value="world4">Mundo 4</option>
+         <option value="world5">Mundo 5</option>
+         <option value="world6">Mundo 6</option>
+      </select>
+      <canvas id="map-preview" width="200" height="200"></canvas>
       <button id="new-game">Novo jogo</button>
       <button id="host-game">Hostear jogo</button>
       <div class="login-join">
@@ -24,7 +34,9 @@
 
    <div id="game-screen" class="hidden">
       <p id="points"> voce tem mts ponto</p>
+      <p id="player-name-display"></p>
       <p id="room-code-display"></p>
+      <button id="leave-game">Sair</button>
       <canvas id="screen" width="25" height="25" ></canvas>
 
       <div id="controles">
@@ -61,7 +73,7 @@
 
 <script type="module" >
 import createKeyboardListener from '../assets/scripts/keyboardListener.js'
-import renderScreen from '../assets/scripts/render.js'
+import renderScreen, { drawTiles, TILE_SIZE } from '../assets/scripts/render.js'
 import createGame from '../assets/scripts/rules.js'
 
 const game = createGame()
@@ -74,23 +86,68 @@ const gameScreen = document.getElementById('game-screen')
 const roomCodeDisplay = document.getElementById('room-code-display')
 const loginError = document.getElementById('login-error')
 const roomCodeInput = document.getElementById('room-code-input')
+const nameInput = document.getElementById('name-input')
+const mapSelect = document.getElementById('map-select')
+const mapPreview = document.getElementById('map-preview')
+const playerNameDisplay = document.getElementById('player-name-display')
 
 const socket = io()
 
 let rendering = false
+let worlds = []
+
+function currentName() {
+   return nameInput.value.trim()
+}
+
+async function loadWorlds() {
+   try {
+      const response = await fetch('/api/worlds')
+      worlds = await response.json()
+      mapSelect.innerHTML = ''
+      for (const world of worlds) {
+         const option = document.createElement('option')
+         option.value = world.id
+         option.textContent = world.name
+         mapSelect.appendChild(option)
+      }
+   } catch {
+      worlds = []
+   }
+   renderPreview()
+}
+
+function renderPreview() {
+   const ctx = mapPreview.getContext('2d')
+   ctx.fillStyle = 'white'
+   ctx.fillRect(0, 0, mapPreview.width, mapPreview.height)
+   const world = worlds.find(w => w.id === mapSelect.value)
+   const size = world?.state?.screen
+   if(!size?.width || !size?.height) return
+   const scale = mapPreview.width / (TILE_SIZE * Math.max(size.width, size.height))
+   drawTiles(ctx, world.state, scale, { walls: 'rgb(45, 45, 45)' })
+}
+
+mapSelect.addEventListener('change', renderPreview)
+loadWorlds()
 
 document.getElementById('new-game').addEventListener('click', () => {
-   socket.emit('create-room', { mode: 'single' })
+   socket.emit('create-room', { mode: 'single', map: mapSelect.value, name: currentName() })
 })
 
 document.getElementById('host-game').addEventListener('click', () => {
-   socket.emit('create-room', { mode: 'online' })
+   socket.emit('create-room', { mode: 'online', map: mapSelect.value, name: currentName() })
 })
 
 document.getElementById('join-room').addEventListener('click', () => {
    const code = roomCodeInput.value.trim().toUpperCase()
    if(!code) return
-   socket.emit('join-room', { code })
+   socket.emit('join-room', { code, name: currentName() })
+})
+
+document.getElementById('leave-game').addEventListener('click', () => {
+   socket.disconnect()
+   location.reload()
 })
 
 roomCodeInput.addEventListener('keydown', (event) => {
@@ -104,6 +161,7 @@ socket.on('setup', ({ code, state }) => {
    game.setState(state)
    roomCodeDisplay.textContent = state.mode === 'single' ? '' : `Sala: ${code}`
    roomCodeDisplay.style.display = state.mode === 'single' ? 'none' : 'block'
+   playerNameDisplay.textContent = `Jogando como: ${state.players[playerId]?.name || ''}`
    loginScreen.classList.add('hidden')
    gameScreen.classList.remove('hidden')
 
