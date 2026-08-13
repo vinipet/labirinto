@@ -18,7 +18,7 @@ O projeto ainda está em desenvolvimento e as próximas atualizações serão vo
 - [ ] Adicionar um modo de criar mapas
 - [x] add chaves e portas
 - [ ] add sistema de combate (melle / bombas)
-- [ ] add armadilha
+- [x] add armadilha
 - [x] caixas
 
 ## 💻 Pré-requisitos

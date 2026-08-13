@@ -34,10 +34,43 @@ export default function createGame(){
    
       },
       tp: {
-        
+         
+      },
+      spikes: {
+
+      },
+      pits: {
+
+      },
+      ice: {
+
+      },
+      snares: {
+
+      },
+      darts: {
+
+      },
+      bombs: {
+
+      },
+      projectiles: {
+
+      },
+      shockwaves: {
+
+      },
+      slides: {
+
+      },
+      boxSlides: {
+
       }
    }
    let contador = 0
+   const DART_DEFAULT_COOLDOWN = 4
+   let projectileIdCounter = 0
+   let shockwaveIdCounter = 0
 
    const observers = []
 
@@ -58,7 +91,10 @@ export default function createGame(){
 
       state.players[playerId] = {
           x: playerX,
-          y: playerY
+          y: playerY,
+          lives: 3,
+          stun: 0,
+          invulnerable: 0
       }
       if(command.name){
          state.players[playerId].name = command.name
@@ -91,63 +127,29 @@ export default function createGame(){
    function movePlayer(command){
       notifyAll(command)
 
-      const acceptedMovements = {
+       const acceptedMovements = {
          ArrowUp(player){
-
-            if(player.y-1 >=0 && 
-               wall(0,-1,player) && 
-               box(0,-1,player) && 
-               win(0,-1,player) && 
-               coin(0,-1,player) && 
-               key(0,-1,player) && 
-               tp(0,-1,player) && 
-               door(0,-1,player) && 
-               keydoor(0,-1,player) && 
-               plate(0,-1,player) ){
-
-               player.y = player.y-1
+            if(canMove(0, -1, player)){
+               player.y = player.y - 1
+               beginSlide(0, -1, player)
             }
          },
          ArrowRight(player){
-            if(player.x+1<state.screen.width && 
-               wall(+1,0,player) && 
-               box(+1,0,player) && 
-               win(+1,0,player) && 
-               coin(+1,0,player) && 
-               key(+1,0,player) && 
-               tp(+1,0,player) && 
-               door(+1,0,player) && 
-               keydoor(+1,0,player) && 
-               plate(+1,0,player)){
-               player.x =player.x+1
+            if(canMove(1, 0, player)){
+               player.x = player.x + 1
+               beginSlide(1, 0, player)
             }
          },
          ArrowDown(player){
-            if(player.y+1<state.screen.height && 
-               wall(0,+1,player) && 
-               box(0,+1,player) && 
-               win(0,+1,player) && 
-               coin(0,+1,player) && 
-               key(0,+1,player) && 
-               tp(0,+1,player) && 
-               door(0,+1,player) && 
-               keydoor(0,+1,player) && 
-               plate(0,+1,player)){
-               player.y=player.y+1
+            if(canMove(0, 1, player)){
+               player.y = player.y + 1
+               beginSlide(0, 1, player)
             }
          },
          ArrowLeft(player){
-            if(player.x-1>=0 && 
-               wall(-1,0,player) && 
-               box(-1,0,player) && 
-               win(-1,0,player) && 
-               coin(-1,0,player) && 
-               key(-1,0,player) && 
-               tp(-1,0,player) && 
-               door(-1,0,player) && 
-               keydoor(-1,0,player) && 
-               plate(-1,0,player)){
-               player.x=player.x-1
+            if(canMove(-1, 0, player)){
+               player.x = player.x - 1
+               beginSlide(-1, 0, player)
             }
          },
          b(player){
@@ -215,6 +217,42 @@ export default function createGame(){
           u(player){
              console.log(player)
           },
+          t(player){
+            let cordenadas = {x: player.x, y: player.y}
+            state.spikes[contador] = cordenadas 
+            contador++
+          },
+          i(player){
+            let cordenadas = {x: player.x, y: player.y}
+            state.ice[contador] = cordenadas 
+            contador++
+          },
+          p(player){
+            let cordenadas = {x: player.x, y: player.y}
+            state.pits[contador] = cordenadas 
+            contador++
+          },
+          e(player){
+            let cordenadas = {x: player.x, y: player.y}
+            state.snares[contador] = cordenadas 
+            contador++
+          },
+          r(player){
+            let cordenadas = {x: player.x, y: player.y}
+            const direction = prompt('direção (ArrowUp/ArrowRight/ArrowDown/ArrowLeft)') || 'ArrowRight'
+            const range = Number(prompt('alcance')) || 3
+            const cooldown = Number(prompt('cooldown em ticks (padrão 4)')) || 4
+            const speed = Number(prompt('velocidade em ticks por tile (padrão 2)')) || 2
+            state.darts[contador] = {...cordenadas, direction, range, cooldown, speed}
+            contador++
+          },
+          o(player){
+            let cordenadas = {x: player.x, y: player.y}
+            const radius = Number(prompt('raio da explosão')) || 3
+            const plate = prompt('id da placa que ativa (opcional)')
+            state.bombs[contador] = {...cordenadas, radius, ...(plate ? { plate } : {})}
+            contador++
+          },
           
        }
 
@@ -224,12 +262,341 @@ export default function createGame(){
        acceptedMovements['d'] = acceptedMovements['ArrowRight']
       const keyPressed = command.keyPressed
       const player = state.players[command.playerId]
+
+      if(player.invulnerable > 0){
+         player.invulnerable--
+      }
+      if(player.stun > 0){
+         player.stun--
+         return
+      }
+
       const moveFunction = acceptedMovements[keyPressed]
 
       if(moveFunction){
          moveFunction(player)
       }
      
+   }
+
+   function canMove(dx, dy, player){
+      const posFutureX = player.x + dx
+      const posFutureY = player.y + dy
+      if(posFutureX < 0 || posFutureY < 0 || posFutureX >= state.screen.width || posFutureY >= state.screen.height){
+         return false
+      }
+      return wall(dx,dy,player)
+         && box(dx,dy,player)
+         && win(dx,dy,player)
+         && coin(dx,dy,player)
+         && key(dx,dy,player)
+         && tp(dx,dy,player)
+         && door(dx,dy,player)
+         && keydoor(dx,dy,player)
+         && plate(dx,dy,player)
+         && spike(dx,dy,player)
+         && pit(dx,dy,player)
+         && snare(dx,dy,player)
+         && dart(dx,dy,player)
+         && bomb(dx,dy,player)
+         && ice(dx,dy,player)
+   }
+
+   function loseLife(player){
+      if(player.invulnerable > 0) return false
+      player.lives--
+      player.invulnerable = 2
+      if(player.lives <= 0){
+         player.lives = 3
+         const spawn = state.spawn || { x: 12, y: 0 }
+         player.x = spawn.x
+         player.y = spawn.y
+         return true
+      }
+      return false
+   }
+
+   function spike(dx, dy, player){
+      const posFutureX = player.x + dx
+      const posFutureY = player.y + dy
+      for(const spikeId in state.spikes){
+         const spike = state.spikes[spikeId]
+         if(posFutureX === spike.x && posFutureY === spike.y){
+            if(loseLife(player)) return false
+         }
+      }
+      return true
+   }
+
+   function pit(dx, dy, player){
+      const posFutureX = player.x + dx
+      const posFutureY = player.y + dy
+      for(const pitId in state.pits){
+         const pit = state.pits[pitId]
+         if(posFutureX === pit.x && posFutureY === pit.y){
+            const spawn = state.spawn || { x: 12, y: 0 }
+            player.x = spawn.x
+            player.y = spawn.y
+            return false
+         }
+      }
+      return true
+   }
+
+   function snare(dx, dy, player){
+      const posFutureX = player.x + dx
+      const posFutureY = player.y + dy
+      for(const snareId in state.snares){
+         const snare = state.snares[snareId]
+         if(posFutureX === snare.x && posFutureY === snare.y){
+            player.stun = 3
+            delete state.snares[snareId]
+            const playerId = findPlayerId(player)
+            if(playerId) delete state.slides[playerId]
+         }
+      }
+      return true
+   }
+
+   const DART_DIRECTIONS = {
+      ArrowUp: { dx: 0, dy: -1 },
+      ArrowRight: { dx: 1, dy: 0 },
+      ArrowDown: { dx: 0, dy: 1 },
+      ArrowLeft: { dx: -1, dy: 0 },
+   }
+
+   function dart(dx, dy, player){
+      return true
+   }
+
+   function bomb(dx, dy, player){
+      const posFutureX = player.x + dx
+      const posFutureY = player.y + dy
+      for(const bombId in state.bombs){
+         const bomb = state.bombs[bombId]
+         if(posFutureX === bomb.x && posFutureY === bomb.y){
+            explodeBomb(bombId)
+            return false
+         }
+      }
+      return true
+   }
+
+   function explodeBomb(bombId){
+      const bomb = state.bombs[bombId]
+      if(!bomb) return
+      delete state.bombs[bombId]
+      const radius = typeof bomb.radius === 'number' ? bomb.radius : 3
+      let blockedRadius = radius
+      for(const wallId in state.walls){
+         const wall = state.walls[wallId]
+         const distance = Math.abs(wall.x - bomb.x) + Math.abs(wall.y - bomb.y)
+         if(distance <= blockedRadius){
+            blockedRadius = distance - 1
+         }
+      }
+      if(blockedRadius < 0) blockedRadius = 0
+      state.shockwaves[shockwaveIdCounter++] = {
+         x: bomb.x,
+         y: bomb.y,
+         radius: 0,
+         maxRadius: blockedRadius,
+         hitPlayers: {}
+      }
+   }
+
+   function hitPlayer(x, y){
+      for(const playerId in state.players){
+         const player = state.players[playerId]
+         if(player.x === x && player.y === y){
+            loseLife(player)
+            return true
+         }
+      }
+      return false
+   }
+
+   function isBlocked(x, y){
+      if(x < 0 || y < 0 || x >= state.screen.width || y >= state.screen.height) return true
+      for(const wallId in state.walls){
+         const wall = state.walls[wallId]
+         if(wall.x === x && wall.y === y) return true
+      }
+      for(const boxId in state.boxes){
+         const box = state.boxes[boxId]
+         if(box.x === x && box.y === y) return true
+      }
+      for(const doorId in state.door){
+         const door = state.door[doorId]
+         if(door.x === x && door.y === y) return true
+      }
+      for(const keydoorId in state.keydoor){
+         const keydoor = state.keydoor[keydoorId]
+         if(keydoor.x === x && keydoor.y === y) return true
+      }
+      return false
+   }
+
+   function tick(){
+      for(const dartId in state.darts){
+         const dart = state.darts[dartId]
+         const dir = DART_DIRECTIONS[dart.direction]
+         if(!dir) continue
+         const cooldown = (dart.cooldown === undefined ? DART_DEFAULT_COOLDOWN : dart.cooldown) - 1
+         if(cooldown > 0){
+            dart.cooldown = cooldown
+            continue
+         }
+         dart.cooldown = DART_DEFAULT_COOLDOWN
+         state.projectiles[projectileIdCounter++] = {
+            x: dart.x,
+            y: dart.y,
+            direction: dart.direction,
+            distance: 0,
+            range: dart.range,
+            speed: dart.speed === undefined ? 2 : dart.speed,
+            timer: 0,
+         }
+      }
+
+      for(const projectileId in state.projectiles){
+         const projectile = state.projectiles[projectileId]
+         const dir = DART_DIRECTIONS[projectile.direction]
+         if(!dir){
+            delete state.projectiles[projectileId]
+            continue
+         }
+         projectile.timer++
+         if(projectile.timer < projectile.speed){
+            continue
+         }
+         projectile.timer = 0
+         projectile.x += dir.dx
+         projectile.y += dir.dy
+         projectile.distance++
+         if(hitPlayer(projectile.x, projectile.y) || isBlocked(projectile.x, projectile.y) || projectile.distance > projectile.range){
+            delete state.projectiles[projectileId]
+         }
+      }
+
+      for(const shockwaveId in state.shockwaves){
+         const shockwave = state.shockwaves[shockwaveId]
+         shockwave.radius++
+         for(const playerId in state.players){
+            const player = state.players[playerId]
+            if(shockwave.hitPlayers[playerId]) continue
+            const distance = Math.abs(player.x - shockwave.x) + Math.abs(player.y - shockwave.y)
+            if(distance <= shockwave.radius){
+               loseLife(player)
+               shockwave.hitPlayers[playerId] = true
+            }
+         }
+         for(const boxId in state.boxes){
+            const box = state.boxes[boxId]
+            const distance = Math.abs(box.x - shockwave.x) + Math.abs(box.y - shockwave.y)
+            if(distance <= shockwave.radius){
+               delete state.boxes[boxId]
+            }
+         }
+         if(shockwave.radius >= shockwave.maxRadius){
+            delete state.shockwaves[shockwaveId]
+         }
+      }
+
+      for(const playerId in state.slides){
+         const player = state.players[playerId]
+         if(!player){
+            delete state.slides[playerId]
+            continue
+         }
+         const slide = state.slides[playerId]
+         if(!isIce(player.x, player.y)){
+            if(slide.leaving){
+               delete state.slides[playerId]
+               continue
+            }
+            slide.leaving = true
+         }
+         if(!canMove(slide.dx, slide.dy, player)){
+            delete state.slides[playerId]
+            continue
+         }
+         player.x += slide.dx
+         player.y += slide.dy
+      }
+
+      for(const boxId in state.boxSlides){
+         const box = state.boxes[boxId]
+         if(!box){
+            delete state.boxSlides[boxId]
+            continue
+         }
+         const slide = state.boxSlides[boxId]
+         if(!isIce(box.x, box.y)){
+            if(slide.leaving){
+               delete state.boxSlides[boxId]
+               continue
+            }
+            slide.leaving = true
+         }
+         const nextX = box.x + slide.dx
+         const nextY = box.y + slide.dy
+         if(isPit(nextX, nextY)){
+            fillPit(nextX, nextY)
+            delete state.boxes[boxId]
+            delete state.boxSlides[boxId]
+            continue
+         }
+         if(!canMoveTo(nextX, nextY, boxId)){
+            delete state.boxSlides[boxId]
+            continue
+         }
+         box.x = nextX
+         box.y = nextY
+      }
+
+      notifyAll({ type: 'tick' })
+   }
+
+   function ice(dx, dy, player){
+      return true
+   }
+
+   function isIce(x, y){
+      for(const iceId in state.ice){
+         const iceTile = state.ice[iceId]
+         if(x === iceTile.x && y === iceTile.y) return true
+      }
+      return false
+   }
+
+   function isPit(x, y){
+      for(const pitId in state.pits){
+         const pit = state.pits[pitId]
+         if(x === pit.x && y === pit.y) return true
+      }
+      return false
+   }
+
+   function fillPit(x, y){
+      for(const pitId in state.pits){
+         const pit = state.pits[pitId]
+         if(x === pit.x && y === pit.y){
+            delete state.pits[pitId]
+            return true
+         }
+      }
+      return false
+   }
+
+   function beginSlide(dx, dy, player){
+      const playerId = findPlayerId(player)
+      if(!playerId) return
+      if(isIce(player.x, player.y)){
+         state.slides[playerId] = { dx, dy }
+      } else {
+         delete state.slides[playerId]
+      }
    }
    
    function wall(commandX, commandY, player){
@@ -273,9 +640,22 @@ export default function createGame(){
       for(const boxId in state.boxes){
          const box = state.boxes[boxId]
          if(posFutureX == box.x && posFutureY == box.y){
-            if(canMoveTo(posFutureX + commandX, posFutureY + commandY, boxId)){
-               box.x = posFutureX + commandX
-               box.y = posFutureY + commandY
+            const boxFutureX = posFutureX + commandX
+            const boxFutureY = posFutureY + commandY
+            if(isPit(boxFutureX, boxFutureY)){
+               fillPit(boxFutureX, boxFutureY)
+               delete state.boxes[boxId]
+               delete state.boxSlides[boxId]
+               return true
+            }
+            if(canMoveTo(boxFutureX, boxFutureY, boxId)){
+               box.x = boxFutureX
+               box.y = boxFutureY
+               if(isIce(box.x, box.y)){
+                  state.boxSlides[boxId] = { dx: commandX, dy: commandY }
+               } else {
+                  delete state.boxSlides[boxId]
+               }
                return true
             }
             return false
@@ -400,6 +780,12 @@ export default function createGame(){
             if(doorId !== null){
                delete state.door[doorId]
             }
+            for(const bombId in state.bombs){
+               const bomb = state.bombs[bombId]
+               if(bomb.plate === plateId){
+                  explodeBomb(bombId)
+               }
+            }
             delete state.plate[plateId]
          }}
       return true
@@ -417,6 +803,7 @@ export default function createGame(){
       subscribe,
       state,
       setState,
+      tick,
    }
   
 }

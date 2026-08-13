@@ -13,7 +13,7 @@ export const worldMaps = {
    world1: { name: 'Sweety Heart', state: wolrd1, spawn: { x: 25, y: 43 } },
    world2: { name: 'Caverna das Moedas', state: wolrd2, spawn: { x: 12, y: 0 } },
    world3: { name: 'Corredor Secreto', state: wolrd3, spawn: { x: 12, y: 0 } },
-   world4: { name: 'Mundo 4', state: wolrd4, spawn: { x: 12, y: 0 } },
+   world4: { name: 'Mundo das Armadilhas', state: wolrd4, spawn: { x: 12, y: 0 } },
    world5: { name: 'Mundo 5', state: world5, spawn: { x: 12, y: 0 } },
    world6: { name: 'Mundo 6', state: wolrd6, spawn: { x: 12, y: 0 } },
 }
@@ -63,6 +63,11 @@ export function createRoomManager() {
       },
       deleteRoom(code) {
          return rooms.delete(code)
+      },
+      tickAll() {
+         for(const game of rooms.values()){
+            game.tick()
+         }
       },
    }
 }

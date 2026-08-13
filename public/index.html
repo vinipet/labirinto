@@ -199,6 +199,10 @@ socket.on('move-player', (command)=>{
    
 })
 
+socket.on('tick', () => {
+   game.tick()
+})
+
 let moveInterval = null
 
 function startMoving(direction) {

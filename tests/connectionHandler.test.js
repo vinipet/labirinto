@@ -59,7 +59,7 @@ describe('handleConnection', () => {
       expect(roomManager.hasRoom(setup.payload.code)).toBe(true)
       expect(socketA.rooms.has(setup.payload.code)).toBe(true)
       expect(socketA.gameRoom).toBe(setup.payload.code)
-      expect(setup.payload.state.players['playerA']).toEqual({ x: 12, y: 0 })
+      expect(setup.payload.state.players['playerA']).toEqual({ x: 12, y: 0, lives: 3, stun: 0, invulnerable: 0 })
    })
 
    it('creates a new game instance for each room', () => {
@@ -80,7 +80,7 @@ describe('handleConnection', () => {
 
       const setupB = findSetup(socketB)
       expect(setupB.payload.code).toBe(code)
-      expect(roomManager.getRoom(code).state.players['playerB']).toEqual({ x: 12, y: 0 })
+      expect(roomManager.getRoom(code).state.players['playerB']).toEqual({ x: 12, y: 0, lives: 3, stun: 0, invulnerable: 0 })
       expect(socketB.rooms.has(code)).toBe(true)
       expect(broadcasts).toContainEqual(
          expect.objectContaining({
@@ -178,7 +178,7 @@ describe('handleConnection', () => {
 
       socketA.fire('move-player', { keyPressed: 'ArrowRight' })
 
-      expect(roomManager.getRoom(code).state.players['playerA']).toEqual({ x: 13, y: 0 })
+      expect(roomManager.getRoom(code).state.players['playerA']).toEqual({ x: 13, y: 0, lives: 3, stun: 0, invulnerable: 0 })
       expect(broadcasts).toContainEqual(
          expect.objectContaining({ code, type: 'move-player', command: { type: 'move-player', playerId: 'playerA', keyPressed: 'ArrowRight' } })
       )

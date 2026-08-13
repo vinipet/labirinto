@@ -15,6 +15,10 @@ app.get('/api/worlds', (req, res) => {
 
 const roomManager = createRoomManager()
 
+const TICK_INTERVAL_MS = 150
+setInterval(() => {
+   roomManager.tickAll()
+}, TICK_INTERVAL_MS)
 
 sockets.on( 'connection', (socket)=>{
    handleConnection(socket, {
