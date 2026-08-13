@@ -442,12 +442,20 @@ export default function createGame(){
          const dart = state.darts[dartId]
          const dir = DART_DIRECTIONS[dart.direction]
          if(!dir) continue
-         const cooldown = (dart.cooldown === undefined ? DART_DEFAULT_COOLDOWN : dart.cooldown) - 1
-         if(cooldown > 0){
-            dart.cooldown = cooldown
-            continue
+         const configured = dart.cooldown === undefined ? DART_DEFAULT_COOLDOWN : dart.cooldown
+         let resetTo
+         if(configured <= 0){
+            resetTo = DART_DEFAULT_COOLDOWN
+         } else {
+            if(dart.base === undefined) dart.base = configured
+            const cooldown = dart.cooldown - 1
+            if(cooldown > 0){
+               dart.cooldown = cooldown
+               continue
+            }
+            resetTo = dart.base
          }
-         dart.cooldown = DART_DEFAULT_COOLDOWN
+         dart.cooldown = resetTo
          state.projectiles[projectileIdCounter++] = {
             x: dart.x,
             y: dart.y,
