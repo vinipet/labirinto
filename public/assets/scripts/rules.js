@@ -2,6 +2,8 @@ export default function createGame(){
    let state = {
       pontos: 0,
       mode: 'online',
+      gameOver: false,
+      win: false,
       screen:{},
       players: {
 
@@ -263,6 +265,9 @@ export default function createGame(){
       const keyPressed = command.keyPressed
       const player = state.players[command.playerId]
 
+      if(state.gameOver || state.win){
+         return
+      }
       if(player.invulnerable > 0){
          player.invulnerable--
       }
@@ -307,6 +312,10 @@ export default function createGame(){
       player.lives--
       player.invulnerable = 2
       if(player.lives <= 0){
+         if(state.mode === 'single'){
+            state.gameOver = true
+            return true
+         }
          player.lives = 3
          const spawn = state.spawn || { x: 12, y: 0 }
          player.x = spawn.x
@@ -678,10 +687,10 @@ export default function createGame(){
       let result = true
       for(let NumWin in state.destiny){
          let win = state.destiny[NumWin]
-         if(posFutureX == win.x && posFutureY == win.y){ 
-            //window.alert('vc ganhou')
-            //window.location.href = '../index.html'
-         } else{}}
+         if(posFutureX == win.x && posFutureY == win.y){
+            state.win = true
+         }
+      }
       return result
    }
    function coin(commandX, commandY, player){

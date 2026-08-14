@@ -54,6 +54,22 @@ export default function handleConnection(socket, { roomManager, broadcast }) {
       }
    })
 
+   socket.on('leave-room', () => {
+      const code = socket.gameRoom
+      if(!code) return
+      const game = roomManager.getRoom(code)
+      if(!game) return
+
+      game.removePlayer({playerId:playerId})
+      socket.leave(code)
+      socket.gameRoom = null
+
+      if(Object.keys(game.state.players).length === 0){
+         roomManager.deleteRoom(code)
+         console.log(`> sala ${code} deletada`)
+      }
+   })
+
    socket.on('move-player', (command)=>{
       const code = socket.gameRoom
       if(!code) return

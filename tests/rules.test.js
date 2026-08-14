@@ -653,6 +653,13 @@ describe('createGame', () => {
       expect(game.state.players['p1']).toEqual({ x: 24, y: 24, lives: 3, stun: 0, invulnerable: 0 })
     })
 
+    it('reaching the destiny tile triggers a win', () => {
+      game.addPlayer({ playerId: 'p1', playerX: 23, playerY: 24 })
+      expect(game.state.win).toBe(false)
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.win).toBe(true)
+    })
+
     it('should return the state reference from the public API', () => {
       expect(game.state).toBeDefined()
       game.state.pontos = 99
@@ -688,6 +695,26 @@ describe('createGame', () => {
       game.state.players['p1'].lives = 1
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       expect(game.state.players['p1']).toEqual({ x: 12, y: 0, lives: 3, stun: 0, invulnerable: 2 })
+    })
+
+    it('triggers game over in single mode when lives run out', () => {
+      game.setState({ mode: 'single', spawn: { x: 12, y: 0 }, spikes: { s1: { x: 6, y: 5 } } })
+      game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
+      game.state.players['p1'].lives = 1
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.gameOver).toBe(true)
+      expect(game.state.players['p1'].lives).toBe(0)
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 0, stun: 0, invulnerable: 2 })
+    })
+
+    it('blocks further movement after game over', () => {
+      game.setState({ mode: 'single', spikes: { s1: { x: 6, y: 5 } } })
+      game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
+      game.state.players['p1'].lives = 1
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
+      expect(game.state.gameOver).toBe(true)
+      game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowDown' })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 0, stun: 0, invulnerable: 2 })
     })
   })
 

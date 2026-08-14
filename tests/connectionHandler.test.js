@@ -18,6 +18,9 @@ function createFakeSocket(id) {
       join(room) {
          socket.rooms.add(room)
       },
+      leave(room) {
+         socket.rooms.delete(room)
+      },
       fire(event, payload) {
          handlers[event](payload)
       },
@@ -207,5 +210,32 @@ describe('handleConnection', () => {
       socketA.fire('disconnect')
 
       expect(roomManager.hasRoom(code)).toBe(false)
+   })
+
+   it('leave-room removes the player and deletes the empty room', () => {
+      socketA.fire('create-room')
+      const code = findSetup(socketA).payload.code
+
+      socketA.fire('leave-room')
+
+      expect(roomManager.hasRoom(code)).toBe(false)
+      expect(socketA.rooms.has(code)).toBe(false)
+      expect(socketA.gameRoom).toBeNull()
+   })
+
+   it('leave-room keeps the room when other players remain', () => {
+      socketA.fire('create-room')
+      const code = findSetup(socketA).payload.code
+      socketB.fire('join-room', { code })
+
+      socketA.fire('leave-room')
+
+      expect(roomManager.hasRoom(code)).toBe(true)
+      expect(roomManager.getRoom(code).state.players['playerB']).toBeDefined()
+      expect(roomManager.getRoom(code).state.players['playerA']).toBeUndefined()
+   })
+
+   it('ignore leave-room before joining a room', () => {
+      expect(() => socketA.fire('leave-room')).not.toThrow()
    })
 })

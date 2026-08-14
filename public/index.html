@@ -95,6 +95,7 @@ const socket = io()
 
 let rendering = false
 let worlds = []
+let subscribed = false
 
 function currentName() {
    return nameInput.value.trim()
@@ -145,6 +146,12 @@ document.getElementById('join-room').addEventListener('click', () => {
    socket.emit('join-room', { code, name: currentName() })
 })
 
+function backToMenu() {
+   socket.emit('leave-room')
+   loginScreen.classList.remove('hidden')
+   gameScreen.classList.add('hidden')
+}
+
 document.getElementById('leave-game').addEventListener('click', () => {
    socket.disconnect()
    location.reload()
@@ -166,13 +173,16 @@ socket.on('setup', ({ code, state }) => {
    gameScreen.classList.remove('hidden')
 
    keyboardListener.registerPlayerId(playerId)
-   keyboardListener.subscribe(game.movePlayer)
-   keyboardListener.subscribe((command)=>{
-      socket.emit('move-player', command)
-   })
+   if(!subscribed){
+      keyboardListener.subscribe(game.movePlayer)
+      keyboardListener.subscribe((command)=>{
+         socket.emit('move-player', command)
+      })
+      subscribed = true
+   }
 
    if(!rendering){
-      renderScreen(screen, game, requestAnimationFrame, playerId)
+      renderScreen(screen, game, requestAnimationFrame, playerId, backToMenu)
       rendering = true
    }
 })

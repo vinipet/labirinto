@@ -1,5 +1,9 @@
 export const TILE_SIZE = 16
 
+const WIN_MENU_DELAY = 3
+let winCountdownStart = null
+let winMenuTriggered = false
+
 export function tileToPixelRect(tile, scale = 1) {
    return {
       x: tile.x * TILE_SIZE * scale,
@@ -38,7 +42,7 @@ export function drawTiles(screen, state, scale = 1, colors = {}) {
    }
 }
 
-export default function renderScreen(screen, game, requestAnimationFrame, currentPlayerId) {
+export default function renderScreen(screen, game, requestAnimationFrame, currentPlayerId, onWinMenu) {
 
    const canvas = screen.canvas
    const screenSize = game.state.screen
@@ -127,7 +131,37 @@ export default function renderScreen(screen, game, requestAnimationFrame, curren
       }
    }
 
+   if(game.state.gameOver || game.state.win){
+      screen.fillStyle = 'rgba(0, 0, 0, 0.6)'
+      screen.fillRect(0, 0, canvas.width, canvas.height)
+      screen.fillStyle = game.state.win ? 'rgb(80, 220, 80)' : 'rgb(230, 80, 80)'
+      screen.font = 'bold 24px monospace'
+      screen.textAlign = 'center'
+      screen.fillText(
+         game.state.win ? 'VOCÊ GANHOU!' : 'GAME OVER',
+         canvas.width / 2,
+         canvas.height / 2
+      )
+      if(game.state.win && game.state.mode === 'single'){
+         if(winCountdownStart === null){
+            winCountdownStart = Date.now()
+            winMenuTriggered = false
+         }
+         const remaining = Math.ceil(WIN_MENU_DELAY - (Date.now() - winCountdownStart) / 1000)
+         screen.fillStyle = 'white'
+         screen.font = 'bold 12px monospace'
+         screen.fillText(`Voltando ao menu em ${remaining}s...`, canvas.width / 2, canvas.height / 2 + 30)
+         if(remaining <= 0 && !winMenuTriggered){
+            winMenuTriggered = true
+            if(onWinMenu) onWinMenu()
+         }
+      }
+   } else {
+      winCountdownStart = null
+      winMenuTriggered = false
+   }
+
    requestAnimationFrame(() => {
-      renderScreen(screen, game, requestAnimationFrame, currentPlayerId)
+      renderScreen(screen, game, requestAnimationFrame, currentPlayerId, onWinMenu)
   })
 }
