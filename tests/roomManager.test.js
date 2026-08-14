@@ -138,3 +138,29 @@ describe('getWorldList', () => {
     expect(world1.state.screen).toEqual({ width: 50, height: 50 })
   })
 })
+
+describe('custom map data', () => {
+  const customState = {
+    screen: { width: 10, height: 10 },
+    players: {},
+    walls: { 0: { x: 1, y: 1 } },
+    coins: { 0: { x: 2, y: 2 } },
+  }
+  const mapData = { name: 'Mapa Local', state: customState, spawn: { x: 0, y: 0 } }
+
+  it('creates a room from full map data', () => {
+    const manager = createRoomManager()
+    const { game } = manager.createRoom('single', 'custom-local', mapData)
+    expect(game.state.screen).toEqual({ width: 10, height: 10 })
+    expect(game.state.spawn).toEqual({ x: 0, y: 0 })
+    expect(game.state.walls['0']).toEqual({ x: 1, y: 1 })
+    expect(game.state.mapData).toBe(mapData)
+  })
+
+  it('falls back to the built-in map when no map data is given', () => {
+    const manager = createRoomManager()
+    const { game } = manager.createRoom('single', 'world1')
+    expect(game.state.screen).toEqual({ width: 50, height: 50 })
+    expect(game.state.mapData).toBeNull()
+  })
+})

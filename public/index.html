@@ -11,31 +11,88 @@
    <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-   <div id="login-screen">
+   <div id="menu-screen" class="screen">
       <h1>Labirinto</h1>
-      <input id="name-input" type="text" placeholder="seu nome" maxlength="12" autocomplete="off">
-      <select id="map-select">
-         <option value="world1">Mundo 1</option>
-         <option value="world2">Mundo 2</option>
-         <option value="world3" selected>Mundo 3</option>
-         <option value="world4">Mundo 4</option>
-         <option value="world5">Mundo 5</option>
-         <option value="world6">Mundo 6</option>
-      </select>
-      <canvas id="map-preview" width="200" height="200"></canvas>
-      <button id="new-game">Novo jogo</button>
-      <button id="host-game">Hostear jogo</button>
-      <div class="login-join">
-         <input id="room-code-input" type="text" placeholder="codigo da sala" maxlength="5" autocomplete="off">
-         <button id="join-room">Entrar em um jogo</button>
-      </div>
-      <p id="login-error"></p>
+      <button id="single-mode">1 Jogador</button>
+      <button id="multi-mode">Multiplayer</button>
+      <button id="editor-mode">Criador de Mapas</button>
    </div>
 
-   <div id="game-screen" class="hidden">
+   <div id="editor-screen" class="screen hidden">
+      <h2>Criador de Mapas</h2>
+      <div class="editor-controls">
+         <input id="map-name-input" type="text" placeholder="nome do mapa" maxlength="24" autocomplete="off">
+         <div class="editor-size">
+            <label for="editor-width">Largura</label>
+            <input id="editor-width" type="number" min="5" max="60" value="25">
+            <label for="editor-height">Altura</label>
+            <input id="editor-height" type="number" min="5" max="60" value="25">
+            <button id="editor-new">Novo mapa</button>
+         </div>
+         <div class="editor-size">
+            <label for="editor-load-select">Editar mundo existente</label>
+            <select id="editor-load-select"></select>
+            <button id="editor-load">Carregar</button>
+         </div>
+      </div>
+      <div class="editor-main">
+         <canvas id="editor-canvas"></canvas>
+         <div class="editor-palette-wrap">
+            <div id="editor-palette" class="editor-palette"></div>
+            <p id="editor-hint"></p>
+            <div id="editor-bomb-radius" class="editor-size hidden">
+               <label for="bomb-radius-minus">Raio da bomba</label>
+               <button id="bomb-radius-minus" type="button">−</button>
+               <span id="bomb-radius-value">3</span>
+               <button id="bomb-radius-plus" type="button">+</button>
+            </div>
+         </div>
+      </div>
+      <p id="editor-status"></p>
+      <button id="editor-save">Salvar mapa</button>
+      <button id="back-menu-editor">Voltar</button>
+   </div>
+
+   <div id="single-screen" class="screen hidden">
+      <h2>Escolha o mapa</h2>
+      <select id="map-select">
+      </select>
+      <canvas id="map-preview" width="200" height="200"></canvas>
+      <button id="start-single">Iniciar</button>
+      <button id="back-menu-single">Voltar</button>
+   </div>
+
+   <div id="multi-screen" class="screen hidden">
+      <h2>Multiplayer</h2>
+      <input id="name-input" type="text" placeholder="seu nome" maxlength="12" autocomplete="off">
+      <button id="create-room">Criar sala</button>
+      <div class="login-join">
+         <input id="room-code-input" type="text" placeholder="codigo da sala" maxlength="5" autocomplete="off">
+         <button id="join-room">Entrar em uma sala</button>
+      </div>
+      <p id="multi-error"></p>
+      <button id="back-menu-multi">Voltar</button>
+   </div>
+
+   <div id="lobby-screen" class="screen hidden">
+      <h2>Lobby</h2>
+      <p id="lobby-code"></p>
+      <p id="lobby-status"></p>
+      <div id="lobby-map" class="hidden">
+         <label for="lobby-map-select">Mapa</label>
+         <select id="lobby-map-select"></select>
+      </div>
+      <canvas id="lobby-preview" width="200" height="200"></canvas>
+      <ul id="lobby-players"></ul>
+      <button id="start-game" class="hidden">Iniciar jogo</button>
+      <button id="leave-lobby">Sair da sala</button>
+   </div>
+
+   <div id="game-screen" class="screen hidden">
       <p id="points"> voce tem mts ponto</p>
       <p id="player-name-display"></p>
       <p id="room-code-display"></p>
+      <button id="end-game" class="hidden">Voltar ao lobby</button>
       <button id="leave-game">Sair</button>
       <canvas id="screen" width="25" height="25" ></canvas>
 
@@ -81,40 +138,128 @@ const canvaElement = document.getElementById('screen')
 const screen = canvaElement.getContext('2d')
 const keyboardListener = createKeyboardListener(document);
 
-const loginScreen = document.getElementById('login-screen')
+const menuScreen = document.getElementById('menu-screen')
+const singleScreen = document.getElementById('single-screen')
+const multiScreen = document.getElementById('multi-screen')
+const lobbyScreen = document.getElementById('lobby-screen')
 const gameScreen = document.getElementById('game-screen')
 const roomCodeDisplay = document.getElementById('room-code-display')
-const loginError = document.getElementById('login-error')
+const lobbyCode = document.getElementById('lobby-code')
+const lobbyStatus = document.getElementById('lobby-status')
+const lobbyPlayers = document.getElementById('lobby-players')
+const multiError = document.getElementById('multi-error')
 const roomCodeInput = document.getElementById('room-code-input')
 const nameInput = document.getElementById('name-input')
 const mapSelect = document.getElementById('map-select')
+const lobbyMapSelect = document.getElementById('lobby-map-select')
+const lobbyMap = document.getElementById('lobby-map')
+const lobbyPreview = document.getElementById('lobby-preview')
 const mapPreview = document.getElementById('map-preview')
 const playerNameDisplay = document.getElementById('player-name-display')
+const startGameBtn = document.getElementById('start-game')
+const endGameBtn = document.getElementById('end-game')
 
 const socket = io()
 
 let rendering = false
 let worlds = []
 let subscribed = false
+let roomCode = ''
+
+function showScreen(id) {
+   for(const el of document.querySelectorAll('.screen')){
+      el.classList.add('hidden')
+   }
+   document.getElementById(id).classList.remove('hidden')
+}
 
 function currentName() {
    return nameInput.value.trim()
+}
+
+function backToMenu() {
+   socket.emit('leave-room')
+   showScreen('menu-screen')
+}
+
+const CUSTOM_MAPS_KEY = 'labirinto-custom-maps'
+
+function loadLocalMaps() {
+   try {
+      const parsed = JSON.parse(localStorage.getItem(CUSTOM_MAPS_KEY) || '[]')
+      return Array.isArray(parsed) ? parsed : []
+   } catch {
+      return []
+   }
+}
+
+function persistLocalMaps(maps) {
+   localStorage.setItem(CUSTOM_MAPS_KEY, JSON.stringify(maps))
+}
+
+function saveLocalMap(map) {
+   const maps = loadLocalMaps().filter(m => m.id !== map.id)
+   maps.push(map)
+   persistLocalMaps(maps)
+   return map
+}
+
+function isBuiltinWorld(id) {
+   return worlds.some(w => w.id === id)
+}
+
+function findWorld(id) {
+   return worlds.find(w => w.id === id) || loadLocalMaps().find(m => m.id === id)
+}
+
+function selectedMapPayload(select) {
+   const id = select.value
+   if(!id) return { map: undefined }
+   if(isBuiltinWorld(id)) return { map: id }
+   const local = loadLocalMaps().find(m => m.id === id)
+   if(local) return { map: id, mapData: { name: local.name, state: local.state, spawn: local.spawn } }
+   return { map: id }
+}
+
+function fillMapSelect(select, selectedId) {
+   select.innerHTML = ''
+   const builtin = document.createElement('optgroup')
+   builtin.label = 'Mapas'
+   for(const world of worlds){
+      const option = document.createElement('option')
+      option.value = world.id
+      option.textContent = world.name
+      builtin.appendChild(option)
+   }
+   const custom = document.createElement('optgroup')
+   custom.label = 'Seus mapas'
+   for(const map of loadLocalMaps()){
+      const option = document.createElement('option')
+      option.value = map.id
+      option.textContent = map.name
+      custom.appendChild(option)
+   }
+   select.appendChild(builtin)
+   select.appendChild(custom)
+   if(selectedId && select.querySelector(`option[value="${selectedId}"]`)){
+      select.value = selectedId
+   }
+}
+
+function refreshWorldSelects() {
+   fillMapSelect(mapSelect, mapSelect.value)
+   fillMapSelect(lobbyMapSelect, lobbyMapSelect.value)
+   fillMapSelect(editorLoadSelect, editorLoadSelect.value)
 }
 
 async function loadWorlds() {
    try {
       const response = await fetch('/api/worlds')
       worlds = await response.json()
-      mapSelect.innerHTML = ''
-      for (const world of worlds) {
-         const option = document.createElement('option')
-         option.value = world.id
-         option.textContent = world.name
-         mapSelect.appendChild(option)
-      }
    } catch {
       worlds = []
    }
+   refreshWorldSelects()
    renderPreview()
 }
 
@@ -122,7 +267,7 @@ function renderPreview() {
    const ctx = mapPreview.getContext('2d')
    ctx.fillStyle = 'white'
    ctx.fillRect(0, 0, mapPreview.width, mapPreview.height)
-   const world = worlds.find(w => w.id === mapSelect.value)
+   const world = findWorld(mapSelect.value)
    const size = world?.state?.screen
    if(!size?.width || !size?.height) return
    const scale = mapPreview.width / (TILE_SIZE * Math.max(size.width, size.height))
@@ -130,14 +275,46 @@ function renderPreview() {
 }
 
 mapSelect.addEventListener('change', renderPreview)
-loadWorlds()
 
-document.getElementById('new-game').addEventListener('click', () => {
-   socket.emit('create-room', { mode: 'single', map: mapSelect.value, name: currentName() })
+document.getElementById('single-mode').addEventListener('click', () => {
+   showScreen('single-screen')
 })
 
-document.getElementById('host-game').addEventListener('click', () => {
-   socket.emit('create-room', { mode: 'online', map: mapSelect.value, name: currentName() })
+document.getElementById('multi-mode').addEventListener('click', () => {
+   multiError.textContent = ''
+   showScreen('multi-screen')
+})
+
+document.getElementById('editor-mode').addEventListener('click', () => {
+   showScreen('editor-screen')
+})
+
+document.getElementById('back-menu-editor').addEventListener('click', () => {
+   showScreen('menu-screen')
+})
+
+document.getElementById('back-menu-single').addEventListener('click', () => {
+   showScreen('menu-screen')
+})
+
+document.getElementById('back-menu-multi').addEventListener('click', () => {
+   showScreen('menu-screen')
+})
+
+document.getElementById('start-single').addEventListener('click', () => {
+   socket.emit('create-room', {
+      mode: 'single',
+      name: currentName() || 'Jogador',
+      ...selectedMapPayload(mapSelect),
+   })
+})
+
+document.getElementById('create-room').addEventListener('click', () => {
+   socket.emit('create-room', {
+      mode: 'online',
+      name: currentName(),
+      ...selectedMapPayload(mapSelect),
+   })
 })
 
 document.getElementById('join-room').addEventListener('click', () => {
@@ -146,33 +323,108 @@ document.getElementById('join-room').addEventListener('click', () => {
    socket.emit('join-room', { code, name: currentName() })
 })
 
-function backToMenu() {
-   socket.emit('leave-room')
-   loginScreen.classList.remove('hidden')
-   gameScreen.classList.add('hidden')
-}
-
-document.getElementById('leave-game').addEventListener('click', () => {
-   socket.disconnect()
-   location.reload()
-})
-
 roomCodeInput.addEventListener('keydown', (event) => {
    if(event.key === 'Enter'){
       document.getElementById('join-room').click()
    }
 })
 
-socket.on('setup', ({ code, state }) => {
-   const playerId = socket.id
-   game.setState(state)
-   roomCodeDisplay.textContent = state.mode === 'single' ? '' : `Sala: ${code}`
-   roomCodeDisplay.style.display = state.mode === 'single' ? 'none' : 'block'
-   playerNameDisplay.textContent = `Jogando como: ${state.players[playerId]?.name || ''}`
-   loginScreen.classList.add('hidden')
-   gameScreen.classList.remove('hidden')
+startGameBtn.addEventListener('click', () => {
+   socket.emit('start-game')
+})
 
-   keyboardListener.registerPlayerId(playerId)
+lobbyMapSelect.addEventListener('change', () => {
+   socket.emit('change-map', selectedMapPayload(lobbyMapSelect))
+})
+
+endGameBtn.addEventListener('click', () => {
+   socket.emit('end-game')
+})
+
+document.getElementById('leave-lobby').addEventListener('click', backToMenu)
+document.getElementById('leave-game').addEventListener('click', backToMenu)
+
+function buildListFromState() {
+   return {
+      hostId: game.state.hostId,
+      started: game.state.started,
+      mapId: game.state.mapId,
+      players: Object.entries(game.state.players).map(([id, p]) => ({ id, name: p.name || '', ready: !!game.state.ready[id] })),
+   }
+}
+
+function renderWorldPreview(canvas, world) {
+   const state = world?.state
+   const size = state?.screen
+   if(!size?.width || !size?.height) return
+   const ctx = canvas.getContext('2d')
+   ctx.fillStyle = 'white'
+   ctx.fillRect(0, 0, canvas.width, canvas.height)
+   const scale = canvas.width / (TILE_SIZE * Math.max(size.width, size.height))
+   drawTiles(ctx, state, scale, { walls: 'rgb(45, 45, 45)' })
+}
+
+function renderLobby(list) {
+   lobbyStatus.textContent = list.started
+      ? 'Jogo em andamento. O host pode reiniciar.'
+      : 'Aguardando o host iniciar o jogo...'
+   const isHost = list.hostId === socket.id
+   lobbyMap.classList.toggle('hidden', !isHost)
+   if(isHost && list.mapId){
+      lobbyMapSelect.value = list.mapId
+   }
+   lobbyPlayers.innerHTML = ''
+   for(const p of list.players){
+      const li = document.createElement('li')
+      const playerIsHost = p.id === list.hostId
+      li.textContent = (p.name || 'Jogador') + (playerIsHost ? ' (host)' : '')
+      const readySpan = document.createElement('span')
+      readySpan.textContent = p.ready ? '✓ pronto' : '...'
+      readySpan.classList.toggle('ready-on', p.ready)
+      li.appendChild(readySpan)
+      if(p.id === socket.id){
+         const readyBtn = document.createElement('button')
+         readyBtn.textContent = p.ready ? 'Cancelar pronto' : 'Pronto'
+         readyBtn.classList.add('ready-btn')
+         readyBtn.addEventListener('click', () => socket.emit('ready-up', { ready: !p.ready }))
+         li.appendChild(readyBtn)
+      }
+      if(isHost && p.id !== socket.id){
+         const kickBtn = document.createElement('button')
+         kickBtn.textContent = 'Expulsar'
+         kickBtn.addEventListener('click', () => socket.emit('kick-player', { playerId: p.id }))
+         li.appendChild(kickBtn)
+      }
+      lobbyPlayers.appendChild(li)
+   }
+   const allReady = list.players.length > 0 && list.players.every(p => p.ready)
+   startGameBtn.classList.toggle('hidden', !isHost)
+   startGameBtn.disabled = !allReady
+   startGameBtn.textContent = allReady ? 'Iniciar jogo' : 'Aguardando todos prontos...'
+}
+
+function enterLobby() {
+   showScreen('lobby-screen')
+   lobbyCode.textContent = `Sala: ${roomCode}`
+   const world = findWorld(game.state.mapId)
+   if(world) renderWorldPreview(lobbyPreview, world)
+   renderLobby(buildListFromState())
+}
+
+function enterGame() {
+   showScreen('game-screen')
+   const single = game.state.mode === 'single'
+   endGameBtn.classList.toggle('hidden', single || game.state.hostId !== socket.id)
+   roomCodeDisplay.textContent = single ? '' : `Sala: ${roomCode}`
+   roomCodeDisplay.style.display = single ? 'none' : 'block'
+   playerNameDisplay.textContent = `Jogando como: ${game.state.players[socket.id]?.name || ''}`
+}
+
+socket.on('setup', ({ code, state }) => {
+   roomCode = code
+   game.setState(state)
+
+   keyboardListener.registerPlayerId(socket.id)
    if(!subscribed){
       keyboardListener.subscribe(game.movePlayer)
       keyboardListener.subscribe((command)=>{
@@ -182,13 +434,45 @@ socket.on('setup', ({ code, state }) => {
    }
 
    if(!rendering){
-      renderScreen(screen, game, requestAnimationFrame, playerId, backToMenu)
+      renderScreen(screen, game, requestAnimationFrame, socket.id, backToMenu)
       rendering = true
+   }
+
+   if(state.mode === 'single'){
+      enterGame()
+   } else {
+      enterLobby()
    }
 })
 
 socket.on('room-not-found', ({ code }) => {
-   loginError.textContent = `sala ${code} nao encontrada`
+   multiError.textContent = `sala ${code} nao encontrada`
+})
+
+socket.on('player-list', (list) => {
+   renderLobby(list)
+   endGameBtn.classList.toggle('hidden', game.state.mode === 'single' || list.hostId !== socket.id)
+})
+
+socket.on('map-preview', ({ map }) => {
+   renderWorldPreview(lobbyPreview, map)
+})
+
+socket.on('game-start', (command) => {
+   game.setState(command.state)
+   enterGame()
+})
+
+socket.on('game-end', (command) => {
+   game.setState(command.state)
+   enterLobby()
+})
+
+socket.on('kicked', ({ playerId }) => {
+   if(playerId === socket.id){
+      socket.emit('leave-room')
+      showScreen('menu-screen')
+   }
 })
 
 socket.on('add-player', (command)=>{
@@ -201,12 +485,9 @@ socket.on('remove-player', (command)=>{
 })
 
 socket.on('move-player', (command)=>{
-   const playerId = socket.id
-   
-   if(playerId !== command.playerId){
+   if(socket.id !== command.playerId){
       game.movePlayer(command)
    }
-   
 })
 
 socket.on('tick', () => {
@@ -245,6 +526,494 @@ document.querySelectorAll('.mov-control').forEach(btn => {
       stopMoving()
    })
 })
+
+const editorCanvas = document.getElementById('editor-canvas')
+const editorPalette = document.getElementById('editor-palette')
+const mapNameInput = document.getElementById('map-name-input')
+const editorWidth = document.getElementById('editor-width')
+const editorHeight = document.getElementById('editor-height')
+const editorStatus = document.getElementById('editor-status')
+const editorNewBtn = document.getElementById('editor-new')
+const editorSaveBtn = document.getElementById('editor-save')
+const editorHint = document.getElementById('editor-hint')
+const editorLoadSelect = document.getElementById('editor-load-select')
+const editorLoadBtn = document.getElementById('editor-load')
+const editorBombRadius = document.getElementById('editor-bomb-radius')
+const bombRadiusMinusBtn = document.getElementById('bomb-radius-minus')
+const bombRadiusPlusBtn = document.getElementById('bomb-radius-plus')
+const bombRadiusValue = document.getElementById('bomb-radius-value')
+
+const EDITOR_CELL = 20
+const EDITOR_TOOLS = [
+   { code: 'f', label: 'Chão', color: '#ffffff' },
+   { code: 'w', label: 'Parede', color: '#2d2d2d' },
+   { code: 'c', label: 'Moeda', color: 'rgb(173, 173, 22)' },
+   { code: 'd', label: 'Destino', color: 'green' },
+   { code: 's', label: 'Spawn', color: '#00ffff' },
+   { code: 'p', label: 'Espinho', color: 'rgb(150, 0, 0)' },
+   { code: 'h', label: 'Poço', color: 'black' },
+   { code: 'i', label: 'Gelo', color: 'rgb(170, 220, 240)' },
+   { code: 'n', label: 'Teia', color: 'rgb(120, 40, 120)' },
+   { code: 'a', label: 'Dardo', color: 'rgb(255, 140, 0)' },
+   { code: 'b', label: 'Bomba', color: 'rgb(200, 60, 60)' },
+   { code: 'x', label: 'Caixa', color: 'rgb(101, 67, 33)' },
+   { code: 'k', label: 'Chave', color: 'rgb(255, 215, 0)' },
+   { code: 'g', label: 'Porta-chave', color: 'rgb(128, 0, 128)' },
+   { code: 'o', label: 'Porta', color: '#a5c9ca' },
+   { code: 'l', label: 'Placa', color: '#808080' },
+   { code: 't', label: 'Teleporte', color: 'brown' },
+   { code: 'link', label: '↔ Linkar', color: '#1d3557' },
+]
+
+let editorGrid = []
+let activeTool = 'w'
+let bombRadius = 3
+let editorScale = 1
+let painting = false
+let editorLinks = []
+let linkSource = null
+let editingMapId = null
+
+function clampNumber(value, min, max) {
+   return Math.min(max, Math.max(min, value))
+}
+
+function resizeEditorCanvas() {
+   const width = clampNumber(editorWidth.value | 0, 5, 60)
+   const height = clampNumber(editorHeight.value | 0, 5, 60)
+   editorScale = Math.min(1, 600 / (Math.max(width, height) * EDITOR_CELL))
+   editorCanvas.width = Math.round(width * EDITOR_CELL * editorScale)
+   editorCanvas.height = Math.round(height * EDITOR_CELL * editorScale)
+}
+
+function renderEditor() {
+   const ctx = editorCanvas.getContext('2d')
+   const width = editorGrid[0]?.length || 0
+   const height = editorGrid.length
+   ctx.fillStyle = '#ffffff'
+   ctx.fillRect(0, 0, editorCanvas.width, editorCanvas.height)
+   const cell = EDITOR_CELL * editorScale
+   for(let y = 0; y < height; y++){
+      for(let x = 0; x < width; x++){
+         const code = editorGrid[y][x]
+         const tool = EDITOR_TOOLS.find(t => t.code === code)
+         if(!tool || code === 'f') continue
+         ctx.fillStyle = tool.color
+         ctx.fillRect(x * cell, y * cell, cell, cell)
+      }
+   }
+   ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)'
+   ctx.lineWidth = 1
+   ctx.beginPath()
+   for(let x = 0; x <= width; x++){
+      ctx.moveTo(x * cell + 0.5, 0)
+      ctx.lineTo(x * cell + 0.5, editorCanvas.height)
+   }
+   for(let y = 0; y <= height; y++){
+      ctx.moveTo(0, y * cell + 0.5)
+      ctx.lineTo(editorCanvas.width, y * cell + 0.5)
+   }
+   ctx.stroke()
+
+   const linkColors = { l: 'rgb(200, 60, 60)', b: 'rgb(230, 150, 0)', t: 'rgb(140, 80, 200)' }
+   for(const link of editorLinks){
+      const srcCode = editorGrid[link.from.y]?.[link.from.x]
+      const color = linkColors[srcCode] || '#1d3557'
+      const ax = (link.from.x + 0.5) * cell
+      const ay = (link.from.y + 0.5) * cell
+      const bx = (link.to.x + 0.5) * cell
+      const by = (link.to.y + 0.5) * cell
+      const angle = Math.atan2(by - ay, bx - ax)
+      ctx.strokeStyle = color
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.moveTo(ax, ay)
+      ctx.lineTo(bx, by)
+      ctx.stroke()
+      ctx.fillStyle = color
+      ctx.beginPath()
+      ctx.moveTo(bx, by)
+      ctx.lineTo(bx - 8 * Math.cos(angle - 0.4), by - 8 * Math.sin(angle - 0.4))
+      ctx.lineTo(bx - 8 * Math.cos(angle + 0.4), by - 8 * Math.sin(angle + 0.4))
+      ctx.closePath()
+      ctx.fill()
+   }
+
+   if(linkSource && editorGrid[linkSource.y]?.[linkSource.x]){
+      ctx.strokeStyle = '#1d3557'
+      ctx.lineWidth = 3
+      ctx.strokeRect(linkSource.x * cell + 1, linkSource.y * cell + 1, cell - 2, cell - 2)
+   }
+}
+
+function isLinkableCode(code) {
+   return code === 'l' || code === 'b' || code === 't'
+}
+
+function isValidLink(srcCode, dstCode) {
+   if(srcCode === 'l') return dstCode === 'o' || dstCode === 'b'
+   if(srcCode === 'b') return dstCode === 'l'
+   if(srcCode === 't') return dstCode === 't'
+   return false
+}
+
+function cellAt(event) {
+   const rect = editorCanvas.getBoundingClientRect()
+   const cell = EDITOR_CELL * editorScale
+   return {
+      x: Math.floor((event.clientX - rect.left) / cell),
+      y: Math.floor((event.clientY - rect.top) / cell),
+   }
+}
+
+function handleLinkClick(x, y) {
+   const code = editorGrid[y]?.[x]
+   if(!linkSource){
+      if(isLinkableCode(code)){
+         linkSource = { x, y }
+      }
+   } else if(linkSource.x === x && linkSource.y === y){
+      linkSource = null
+   } else if(isValidLink(editorGrid[linkSource.y]?.[linkSource.x], code)){
+      const existing = editorLinks.find(l =>
+         l.from.x === linkSource.x && l.from.y === linkSource.y &&
+         l.to.x === x && l.to.y === y
+      )
+      if(existing){
+         editorLinks = editorLinks.filter(l => l !== existing)
+      } else {
+         editorLinks = editorLinks.filter(l => !(
+            (l.from.x === linkSource.x && l.from.y === linkSource.y && l.to.x === x && l.to.y === y) ||
+            (l.from.x === x && l.from.y === y && l.to.x === linkSource.x && l.to.y === linkSource.y)
+         ))
+         editorLinks.push({ from: { ...linkSource }, to: { x, y } })
+      }
+      linkSource = null
+   } else {
+      linkSource = isLinkableCode(code) ? { x, y } : null
+   }
+   renderEditor()
+}
+
+function removeLinksAt(x, y) {
+   editorLinks = editorLinks.filter(l =>
+      !(l.from.x === x && l.from.y === y) && !(l.to.x === x && l.to.y === y)
+   )
+}
+
+function paintEditor(event) {
+   const { x, y } = cellAt(event)
+   if(!editorGrid[y] || editorGrid[y][x] === undefined) return
+   if(activeTool === 's'){
+      for(const row of editorGrid){
+         for(let i = 0; i < row.length; i++){
+            if(row[i] === 's') row[i] = 'f'
+         }
+      }
+   }
+   editorGrid[y][x] = activeTool
+   removeLinksAt(x, y)
+   renderEditor()
+}
+
+editorCanvas.addEventListener('pointerdown', (event) => {
+   event.preventDefault()
+   if(activeTool === 'link'){
+      const { x, y } = cellAt(event)
+      if(editorGrid[y]?.[x] !== undefined) handleLinkClick(x, y)
+      return
+   }
+   painting = true
+   editorCanvas.setPointerCapture(event.pointerId)
+   paintEditor(event)
+})
+
+editorCanvas.addEventListener('pointermove', (event) => {
+   if(painting) paintEditor(event)
+})
+
+editorCanvas.addEventListener('pointerup', (event) => {
+   painting = false
+})
+
+editorCanvas.addEventListener('pointercancel', () => {
+   painting = false
+})
+
+function buildPalette() {
+   editorPalette.innerHTML = ''
+   for(const tool of EDITOR_TOOLS){
+      const btn = document.createElement('button')
+      btn.dataset.code = tool.code
+      btn.style.background = tool.color
+      btn.textContent = tool.label
+      btn.title = tool.label
+      btn.addEventListener('click', () => {
+         activeTool = tool.code
+         editorPalette.querySelectorAll('button').forEach(b => b.classList.remove('active'))
+         btn.classList.add('active')
+         editorHint.textContent = tool.code === 'link'
+            ? 'Clique em 2 peças: Placa→Porta, Placa→Bomba, Bomba→Placa ou Teleporte→Teleporte.'
+            : (tool.code === 'f' ? 'Chão apaga o que estiver na célula.'
+               : (tool.code === 'b' ? 'Bomba explode em cruz até o raio definido (paredes bloqueiam só nessa direção).'
+               : ''))
+         editorBombRadius.classList.toggle('hidden', tool.code !== 'b')
+      })
+      editorPalette.appendChild(btn)
+   }
+   editorPalette.querySelector(`[data-code="${activeTool}"]`).classList.add('active')
+   editorHint.textContent = 'Clique em 2 peças para linkar: Placa→Porta, Placa→Bomba, Bomba→Placa ou Teleporte→Teleporte.'
+}
+
+bombRadiusMinusBtn.addEventListener('click', () => {
+   bombRadius = Math.max(1, bombRadius - 1)
+   bombRadiusValue.textContent = bombRadius
+})
+
+bombRadiusPlusBtn.addEventListener('click', () => {
+   bombRadius = Math.min(10, bombRadius + 1)
+   bombRadiusValue.textContent = bombRadius
+})
+
+function newEditorMap() {
+   const width = clampNumber(editorWidth.value | 0, 5, 60)
+   const height = clampNumber(editorHeight.value | 0, 5, 60)
+   editorGrid = Array.from({ length: height }, () => Array(width).fill('f'))
+   editorLinks = []
+   linkSource = null
+   editingMapId = null
+   resizeEditorCanvas()
+   renderEditor()
+}
+
+function loadWorldToEditor(world) {
+   const state = world?.state
+   const size = state?.screen
+   if(!size?.width || !size?.height){
+      editorStatus.textContent = 'mundo inválido'
+      return
+   }
+   editorWidth.value = size.width
+   editorHeight.value = size.height
+   resizeEditorCanvas()
+   editorGrid = Array.from({ length: size.height }, () => Array(size.width).fill('f'))
+   const setCell = (code, tile) => {
+      if(editorGrid[tile.y]?.[tile.x] !== undefined) editorGrid[tile.y][tile.x] = code
+   }
+   const collections = {
+      walls: 'w', coins: 'c', destiny: 'd', spikes: 'p', pits: 'h',
+      ice: 'i', snares: 'n', boxes: 'x', keys: 'k', keydoor: 'g',
+      door: 'o', plate: 'l', tp: 't', darts: 'a', bombs: 'b',
+   }
+   for(const key in collections){
+      for(const id in state[key]) setCell(collections[key], state[key][id])
+   }
+   const firstBombId = Object.keys(state.bombs)[0]
+   if(firstBombId && typeof state.bombs[firstBombId].radius === 'number'){
+      bombRadius = state.bombs[firstBombId].radius
+      bombRadiusValue.textContent = bombRadius
+   }
+   if(world.spawn) setCell('s', world.spawn)
+
+   editorLinks = []
+   const byPos = (coll) => {
+      const map = {}
+      for(const id in state[coll]) map[`${state[coll][id].x},${state[coll][id].y}`] = id
+      return map
+   }
+   const doorByPos = byPos('door')
+   const plateByPos = byPos('plate')
+   const tpByPos = byPos('tp')
+   for(const id in state.plate){
+      const plate = state.plate[id]
+      const doorRef = typeof plate.door === 'string' ? state.door[plate.door] : plate.door
+      if(doorRef && doorByPos[`${doorRef.x},${doorRef.y}`]){
+         editorLinks.push({ from: { x: plate.x, y: plate.y }, to: { x: doorRef.x, y: doorRef.y } })
+      }
+   }
+   for(const id in state.bombs){
+      const bomb = state.bombs[id]
+      const plate = typeof bomb.plate === 'string' ? state.plate[bomb.plate] : null
+      if(plate){
+         editorLinks.push({ from: { x: bomb.x, y: bomb.y }, to: { x: plate.x, y: plate.y } })
+      }
+   }
+   for(const id in state.tp){
+      const tp = state.tp[id]
+      if(!tp.destino) continue
+      const destKey = `${tp.destino.x},${tp.destino.y}`
+      if(!tpByPos[destKey]) continue
+      const already = editorLinks.some(l =>
+         (l.from.x === tp.x && l.from.y === tp.y && l.to.x === tp.destino.x && l.to.y === tp.destino.y) ||
+         (l.from.x === tp.destino.x && l.from.y === tp.destino.y && l.to.x === tp.x && l.to.y === tp.y)
+      )
+      if(!already){
+         editorLinks.push({ from: { x: tp.x, y: tp.y }, to: { x: tp.destino.x, y: tp.destino.y } })
+      }
+   }
+
+   mapNameInput.value = world.name || ''
+   editingMapId = isBuiltinWorld(world.id) ? null : world.id
+   editorStatus.textContent = `Mundo "${world.name}" carregado.`
+   renderEditor()
+}
+
+editorLoadBtn.addEventListener('click', () => {
+   const world = findWorld(editorLoadSelect.value)
+   if(world) loadWorldToEditor(world)
+})
+
+function buildStateFromGrid() {
+   const width = editorGrid[0]?.length || 0
+   const height = editorGrid.length
+   const state = {
+      screen: { width, height },
+      players: {},
+      walls: {}, boxes: {}, door: {}, keydoor: {}, keys: {}, destiny: {},
+      coins: {}, tp: {}, spikes: {}, pits: {}, ice: {}, snares: {}, darts: {},
+      bombs: {}, plate: {}, projectiles: {}, shockwaves: {}, slides: {}, boxSlides: {}, inventory: {}
+   }
+   let id = 0
+   let spawn = { x: 0, y: 0 }
+   for(let y = 0; y < height; y++){
+      for(let x = 0; x < width; x++){
+         const code = editorGrid[y][x] || 'f'
+         const add = (coll) => { state[coll][id] = { x, y }; id++ }
+         switch(code){
+            case 'w': add('walls'); break
+            case 'c': add('coins'); break
+            case 'd': add('destiny'); break
+            case 's': spawn = { x, y }; break
+            case 'p': add('spikes'); break
+            case 'h': add('pits'); break
+            case 'i': add('ice'); break
+            case 'n': add('snares'); break
+            case 'a': state.darts[id] = { x, y, direction: 'ArrowRight', range: 5, cooldown: 4, speed: 2 }; id++; break
+             case 'b': state.bombs[id] = { x, y, radius: bombRadius }; id++; break
+            case 'x': add('boxes'); break
+            case 'k': add('keys'); break
+            case 'g': add('keydoor'); break
+            case 'o': state.door[id] = { x, y }; id++; break
+            case 'l': state.plate[id] = { x, y }; id++; break
+            case 't': break
+         }
+      }
+   }
+   const doorIds = Object.keys(state.door)
+   const idByPos = (coll) => {
+      const map = {}
+      for(const id in state[coll]){
+         map[`${state[coll][id].x},${state[coll][id].y}`] = id
+      }
+      return map
+   }
+   const doorIdByPos = idByPos('door')
+
+   function linksBetween(a, b) {
+      return editorLinks.some(l =>
+         (l.from.x === a.x && l.from.y === a.y && l.to.x === b.x && l.to.y === b.y) ||
+         (l.from.x === b.x && l.from.y === b.y && l.to.x === a.x && l.to.y === a.y)
+      )
+   }
+
+   const platesWithBomb = new Set()
+   for(const bombId in state.bombs){
+      const bomb = state.bombs[bombId]
+      for(const plateId in state.plate){
+         if(linksBetween(bomb, state.plate[plateId])){
+            bomb.plate = plateId
+            platesWithBomb.add(plateId)
+            break
+         }
+      }
+   }
+
+   for(const plateId in state.plate){
+      const plate = state.plate[plateId]
+      const doorLink = editorLinks.find(l =>
+         l.from.x === plate.x && l.from.y === plate.y &&
+         editorGrid[l.to.y]?.[l.to.x] === 'o'
+      )
+      const target = doorLink && doorIdByPos[`${doorLink.to.x},${doorLink.to.y}`]
+      if(target){
+         plate.door = target
+      } else if(doorIds.length && !platesWithBomb.has(plateId)){
+         plate.door = doorIds[0]
+      }
+   }
+
+   const teleportCells = []
+   for(let y = 0; y < height; y++){
+      for(let x = 0; x < width; x++){
+         if(editorGrid[y][x] === 't') teleportCells.push({ x, y })
+      }
+   }
+   const paired = new Set()
+   const tpPairs = []
+   for(const link of editorLinks){
+      if(editorGrid[link.from.y]?.[link.from.x] !== 't') continue
+      if(editorGrid[link.to.y]?.[link.to.x] !== 't') continue
+      const keyA = `${link.from.x},${link.from.y}`
+      const keyB = `${link.to.x},${link.to.y}`
+      if(paired.has(keyA) || paired.has(keyB)) continue
+      tpPairs.push([link.from, link.to])
+      paired.add(keyA)
+      paired.add(keyB)
+   }
+   for(const cell of teleportCells){
+      const key = `${cell.x},${cell.y}`
+      if(paired.has(key)) continue
+      const mate = teleportCells.find(other => {
+         const otherKey = `${other.x},${other.y}`
+         return otherKey !== key && !paired.has(otherKey)
+      })
+      if(!mate) break
+      paired.add(key)
+      paired.add(`${mate.x},${mate.y}`)
+      tpPairs.push([cell, mate])
+   }
+   for(let i = 0; i < tpPairs.length; i++){
+      const [a, b] = tpPairs[i]
+      state.tp[i * 2] = { ...a, destino: { x: b.x, y: b.y } }
+      state.tp[i * 2 + 1] = { ...b, destino: { x: a.x, y: a.y } }
+   }
+   return { state, spawn }
+}
+
+editorNewBtn.addEventListener('click', () => {
+   newEditorMap()
+   mapNameInput.value = ''
+   editorStatus.textContent = ''
+})
+
+editorSaveBtn.addEventListener('click', () => {
+   const name = mapNameInput.value.trim()
+   if(!name){
+      editorStatus.textContent = 'dê um nome ao mapa'
+      return
+   }
+   const { state, spawn } = buildStateFromGrid()
+   let map
+   if(editingMapId){
+      map = { id: editingMapId, name, state, spawn }
+   } else {
+      map = {
+         id: 'custom-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+         name,
+         state,
+         spawn,
+      }
+   }
+   saveLocalMap(map)
+   editingMapId = map.id
+   editorStatus.textContent = `Mapa "${name}" salvo localmente!`
+   refreshWorldSelects()
+})
+
+buildPalette()
+newEditorMap()
+loadWorlds()
+
 </script>
 </body>
 </html>

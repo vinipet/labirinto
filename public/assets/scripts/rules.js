@@ -1,6 +1,5 @@
 export default function createGame(){
    let state = {
-      pontos: 0,
       mode: 'online',
       gameOver: false,
       win: false,
@@ -69,7 +68,6 @@ export default function createGame(){
 
       }
    }
-   let contador = 0
    const DART_DEFAULT_COOLDOWN = 4
    let projectileIdCounter = 0
    let shockwaveIdCounter = 0
@@ -96,7 +94,8 @@ export default function createGame(){
           y: playerY,
           lives: 3,
           stun: 0,
-          invulnerable: 0
+          invulnerable: 0,
+          pontos: 0
       }
       if(command.name){
          state.players[playerId].name = command.name
@@ -154,108 +153,6 @@ export default function createGame(){
                beginSlide(-1, 0, player)
             }
          },
-         b(player){
-         const obj = JSON.stringify(state,0,1)
-            console.log(obj)
-         },
-         m(player){
-           let cordenadas = {x: player.x, y: player.y}
-           state.walls[contador] = cordenadas 
-           contador++
-         }, 
-         n(player){
-            let cordenadas = {x: player.x, y: player.y}
-            state.coins[contador] = cordenadas 
-            contador++
-         },
-         k(player){
-            let cordenadas = {x: player.x, y: player.y}
-            state.boxes[contador] = cordenadas 
-            contador++
-         },
-         y(player){
-            let cordenadas = {x: player.x, y: player.y}
-            state.keys[contador] = cordenadas 
-            contador++
-         },
-         l(player){
-            let cordenadas = {x: player.x, y: player.y}
-            state.keydoor[contador] = cordenadas 
-            contador++
-         },
-         c(player){
-            console.log(`x:${player.x} y:${ player.y}`)
-         },
-         v(player){
-            let cordenadas = {x: player.x, y: player.y}
-            state.destiny[contador] = cordenadas 
-            contador++
-         },
-         x(player){
-            let x = player.x 
-            let y = player.y
-            let to ={
-               'x':Number(prompt('digite a cordenada X')),
-               'y':Number(prompt('digite a cordenada y'))
-            }
-            
-            state.tp[contador] = {x, y, destino:to}
-            contador++
-            state.tp[contador] = to
-            state.tp[contador].destino = {x,y}
-            
-         },
-         z(player){
-            let cordenadas = {x: player.x, y: player.y}
-            state.plate[contador] = cordenadas 
-            let to ={
-               'x':Number(prompt('digite a cordenada X')),
-               'y':Number(prompt('digite a cordenada y'))
-            }
-            state.door[contador] = to
-            state.plate[contador].door = state.door[contador]
-            contador++
-          }, 
-          u(player){
-             console.log(player)
-          },
-          t(player){
-            let cordenadas = {x: player.x, y: player.y}
-            state.spikes[contador] = cordenadas 
-            contador++
-          },
-          i(player){
-            let cordenadas = {x: player.x, y: player.y}
-            state.ice[contador] = cordenadas 
-            contador++
-          },
-          p(player){
-            let cordenadas = {x: player.x, y: player.y}
-            state.pits[contador] = cordenadas 
-            contador++
-          },
-          e(player){
-            let cordenadas = {x: player.x, y: player.y}
-            state.snares[contador] = cordenadas 
-            contador++
-          },
-          r(player){
-            let cordenadas = {x: player.x, y: player.y}
-            const direction = prompt('direção (ArrowUp/ArrowRight/ArrowDown/ArrowLeft)') || 'ArrowRight'
-            const range = Number(prompt('alcance')) || 3
-            const cooldown = Number(prompt('cooldown em ticks (padrão 4)')) || 4
-            const speed = Number(prompt('velocidade em ticks por tile (padrão 2)')) || 2
-            state.darts[contador] = {...cordenadas, direction, range, cooldown, speed}
-            contador++
-          },
-          o(player){
-            let cordenadas = {x: player.x, y: player.y}
-            const radius = Number(prompt('raio da explosão')) || 3
-            const plate = prompt('id da placa que ativa (opcional)')
-            state.bombs[contador] = {...cordenadas, radius, ...(plate ? { plate } : {})}
-            contador++
-          },
-          
        }
 
        acceptedMovements['w'] = acceptedMovements['ArrowUp']
@@ -396,22 +293,30 @@ export default function createGame(){
       if(!bomb) return
       delete state.bombs[bombId]
       const radius = typeof bomb.radius === 'number' ? bomb.radius : 3
-      let blockedRadius = radius
-      for(const wallId in state.walls){
-         const wall = state.walls[wallId]
-         const distance = Math.abs(wall.x - bomb.x) + Math.abs(wall.y - bomb.y)
-         if(distance <= blockedRadius){
-            blockedRadius = distance - 1
+      for(const playerId in state.players){
+         if(state.players[playerId].x === bomb.x && state.players[playerId].y === bomb.y){
+            loseLife(state.players[playerId])
          }
       }
-      if(blockedRadius < 0) blockedRadius = 0
+      for(const boxId in state.boxes){
+         if(state.boxes[boxId].x === bomb.x && state.boxes[boxId].y === bomb.y){
+            delete state.boxes[boxId]
+         }
+      }
       state.shockwaves[shockwaveIdCounter++] = {
          x: bomb.x,
          y: bomb.y,
-         radius: 0,
-         maxRadius: blockedRadius,
+         maxRadius: radius,
+         cells: { [bomb.x + ',' + bomb.y]: true },
          hitPlayers: {}
       }
+   }
+
+   function hasWall(x, y){
+      for(const wallId in state.walls){
+         if(state.walls[wallId].x === x && state.walls[wallId].y === y) return true
+      }
+      return false
    }
 
    function hitPlayer(x, y){
@@ -498,25 +403,44 @@ export default function createGame(){
 
       for(const shockwaveId in state.shockwaves){
          const shockwave = state.shockwaves[shockwaveId]
-         shockwave.radius++
-         for(const playerId in state.players){
-            const player = state.players[playerId]
-            if(shockwave.hitPlayers[playerId]) continue
-            const distance = Math.abs(player.x - shockwave.x) + Math.abs(player.y - shockwave.y)
-            if(distance <= shockwave.radius){
-               loseLife(player)
-               shockwave.hitPlayers[playerId] = true
+         const growth = {}
+         for(const key in shockwave.cells){
+            const comma = key.indexOf(',')
+            const cx = +key.slice(0, comma)
+            const cy = +key.slice(comma + 1)
+            const neighbors = [cx + 1, cy, cx - 1, cy, cx, cy + 1, cx, cy - 1]
+            for(let i = 0; i < 8; i += 2){
+               const nx = neighbors[i]
+               const ny = neighbors[i + 1]
+               if(nx < 0 || ny < 0 || nx >= state.screen.width || ny >= state.screen.height) continue
+               if(Math.abs(nx - shockwave.x) + Math.abs(ny - shockwave.y) > shockwave.maxRadius) continue
+               if(hasWall(nx, ny)) continue
+               const nkey = nx + ',' + ny
+               if(shockwave.cells[nkey] || growth[nkey]) continue
+               growth[nkey] = true
             }
          }
-         for(const boxId in state.boxes){
-            const box = state.boxes[boxId]
-            const distance = Math.abs(box.x - shockwave.x) + Math.abs(box.y - shockwave.y)
-            if(distance <= shockwave.radius){
-               delete state.boxes[boxId]
-            }
-         }
-         if(shockwave.radius >= shockwave.maxRadius){
+         if(Object.keys(growth).length === 0){
             delete state.shockwaves[shockwaveId]
+            continue
+         }
+         for(const nkey in growth){
+            const comma = nkey.indexOf(',')
+            const nx = +nkey.slice(0, comma)
+            const ny = +nkey.slice(comma + 1)
+            shockwave.cells[nkey] = true
+            for(const playerId in state.players){
+               if(shockwave.hitPlayers[playerId]) continue
+               if(state.players[playerId].x === nx && state.players[playerId].y === ny){
+                  loseLife(state.players[playerId])
+                  shockwave.hitPlayers[playerId] = true
+               }
+            }
+            for(const boxId in state.boxes){
+               if(state.boxes[boxId].x === nx && state.boxes[boxId].y === ny){
+                  delete state.boxes[boxId]
+               }
+            }
          }
       }
 
@@ -701,7 +625,7 @@ export default function createGame(){
       for(let coinNUm in state.coins){
          let coin = state.coins[coinNUm]
          if(posFutureX == coin.x && posFutureY == coin.y){ 
-            state.pontos ++
+            player.pontos ++
             coin.x = -1
             coin.y = -1
          } else{}}

@@ -45,13 +45,18 @@ export function createRoomManager() {
    const rooms = new Map()
 
    return {
-      createRoom(mode = 'online', mapId = 'world3') {
+      createRoom(mode = 'online', mapId = 'world3', mapData = null) {
          const code = generateRoomCode(new Set(rooms.keys()))
          const game = CreateGame()
-         const world = getWorldMap(mapId)
+         const world = mapData || getWorldMap(mapId)
          game.setState(structuredClone(world.state))
          game.state.mode = mode
          game.state.spawn = { ...world.spawn }
+         game.state.mapId = mapId
+         game.state.mapData = mapData
+         game.state.hostId = null
+         game.state.started = false
+         game.state.ready = {}
          rooms.set(code, game)
          return { code, game }
       },
@@ -66,7 +71,9 @@ export function createRoomManager() {
       },
       tickAll() {
          for(const game of rooms.values()){
-            game.tick()
+            if(game.state.started !== false){
+               game.tick()
+            }
          }
       },
    }

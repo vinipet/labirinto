@@ -1,13 +1,16 @@
 import Express  from "express";
 import http from 'http'
+import path from 'path'
+import {fileURLToPath} from 'url'
 import {Server} from 'socket.io'
 import { createRoomManager, getWorldList } from './roomManager.js'
 import handleConnection from './connectionHandler.js'
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = Express()
 const server = http.createServer(app)
 const sockets = new Server(server)
-app.use(Express.static('public'))
+app.use(Express.static(path.join(__dirname, '../public')))
 
 app.get('/api/worlds', (req, res) => {
    res.json(getWorldList())

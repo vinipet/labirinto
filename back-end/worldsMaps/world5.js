@@ -1,6 +1,5 @@
 
 const mundo = {
-   pontos: 0,
    screen:{width:25, height:25},
    players: {
       'player1': {x:12, y:0}

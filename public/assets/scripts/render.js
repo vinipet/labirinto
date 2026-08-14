@@ -57,7 +57,8 @@ export default function renderScreen(screen, game, requestAnimationFrame, curren
    const currentPlayer = game.state.players[currentPlayerId]
    let ponto = document.getElementById('points')
    const lives = currentPlayer ? currentPlayer.lives : 3
-   ponto.innerHTML = `Você tem ${game.state.pontos} pontos • Vidas: ${lives}/3`
+   const pontos = currentPlayer ? currentPlayer.pontos : 0
+   ponto.innerHTML = `Você tem ${pontos} pontos • Vidas: ${lives}/3`
 
    screen.fillStyle = 'white'
    screen.clearRect(0,0,canvas.width,canvas.height)
@@ -96,18 +97,21 @@ export default function renderScreen(screen, game, requestAnimationFrame, curren
 
    for(const shockwaveId in game.state.shockwaves){
       const shockwave = game.state.shockwaves[shockwaveId]
-      const centerX = shockwave.x * TILE_SIZE + TILE_SIZE / 2
-      const centerY = shockwave.y * TILE_SIZE + TILE_SIZE / 2
-      const radius = shockwave.radius * TILE_SIZE
       screen.fillStyle = 'rgba(255, 100, 0, 0.2)'
-      screen.beginPath()
-      screen.arc(centerX, centerY, radius, 0, Math.PI * 2)
-      screen.fill()
+      for(const key in shockwave.cells){
+         const comma = key.indexOf(',')
+         const cx = +key.slice(0, comma)
+         const cy = +key.slice(comma + 1)
+         screen.fillRect(cx * TILE_SIZE, cy * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+      }
       screen.strokeStyle = 'rgba(255, 140, 0, 0.9)'
       screen.lineWidth = 2
-      screen.beginPath()
-      screen.arc(centerX, centerY, radius, 0, Math.PI * 2)
-      screen.stroke()
+      for(const key in shockwave.cells){
+         const comma = key.indexOf(',')
+         const cx = +key.slice(0, comma)
+         const cy = +key.slice(comma + 1)
+         screen.strokeRect(cx * TILE_SIZE + 1, cy * TILE_SIZE + 1, TILE_SIZE - 2, TILE_SIZE - 2)
+      }
    }
 
    for(const playerId in game.state.players){

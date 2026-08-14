@@ -53,6 +53,10 @@ describe('handleConnection', () => {
       return socket.emitted.find((e) => e.event === 'setup')
    }
 
+   function readyUp(socket, ready = true) {
+      socket.fire('ready-up', { ready })
+   }
+
    it('creates a room and sends setup with a unique code', () => {
       socketA.fire('create-room')
 
@@ -62,7 +66,7 @@ describe('handleConnection', () => {
       expect(roomManager.hasRoom(setup.payload.code)).toBe(true)
       expect(socketA.rooms.has(setup.payload.code)).toBe(true)
       expect(socketA.gameRoom).toBe(setup.payload.code)
-      expect(setup.payload.state.players['playerA']).toEqual({ x: 12, y: 0, lives: 3, stun: 0, invulnerable: 0 })
+      expect(setup.payload.state.players['playerA']).toEqual({ x: 12, y: 0, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
    })
 
    it('creates a new game instance for each room', () => {
@@ -83,7 +87,7 @@ describe('handleConnection', () => {
 
       const setupB = findSetup(socketB)
       expect(setupB.payload.code).toBe(code)
-      expect(roomManager.getRoom(code).state.players['playerB']).toEqual({ x: 12, y: 0, lives: 3, stun: 0, invulnerable: 0 })
+      expect(roomManager.getRoom(code).state.players['playerB']).toEqual({ x: 12, y: 0, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
       expect(socketB.rooms.has(code)).toBe(true)
       expect(broadcasts).toContainEqual(
          expect.objectContaining({
@@ -178,10 +182,12 @@ describe('handleConnection', () => {
    it('routes move-player to the correct room game', () => {
       socketA.fire('create-room')
       const code = findSetup(socketA).payload.code
+      readyUp(socketA)
+      socketA.fire('start-game')
 
       socketA.fire('move-player', { keyPressed: 'ArrowRight' })
 
-      expect(roomManager.getRoom(code).state.players['playerA']).toEqual({ x: 13, y: 0, lives: 3, stun: 0, invulnerable: 0 })
+      expect(roomManager.getRoom(code).state.players['playerA']).toEqual({ x: 13, y: 0, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
       expect(broadcasts).toContainEqual(
          expect.objectContaining({ code, type: 'move-player', command: { type: 'move-player', playerId: 'playerA', keyPressed: 'ArrowRight' } })
       )
@@ -237,5 +243,312 @@ describe('handleConnection', () => {
 
    it('ignore leave-room before joining a room', () => {
       expect(() => socketA.fire('leave-room')).not.toThrow()
+   })
+
+   describe('lobby and host', () => {
+      function playerListFor(code) {
+         return [...broadcasts].reverse().find((b) => b.code === code && b.type === 'player-list')
+      }
+
+      it('makes the creator the host', () => {
+         socketA.fire('create-room')
+         const code = findSetup(socketA).payload.code
+
+         expect(roomManager.getRoom(code).state.hostId).toBe('playerA')
+         expect(playerListFor(code).command.hostId).toBe('playerA')
+      })
+
+      it('starts single rooms immediately and online rooms in the lobby', () => {
+         socketA.fire('create-room', { mode: 'single' })
+         expect(findSetup(socketA).payload.state.started).toBe(true)
+
+         socketB.fire('create-room', { mode: 'online' })
+         expect(findSetup(socketB).payload.state.started).toBe(false)
+      })
+
+      it('reassigns the host when the host leaves', () => {
+         socketA.fire('create-room')
+         const code = findSetup(socketA).payload.code
+         socketB.fire('join-room', { code })
+
+         socketA.fire('leave-room')
+
+         expect(roomManager.getRoom(code).state.hostId).toBe('playerB')
+         expect(playerListFor(code).command.hostId).toBe('playerB')
+      })
+
+      it('reassigns the host when the host disconnects', () => {
+         socketA.fire('create-room')
+         const code = findSetup(socketA).payload.code
+         socketB.fire('join-room', { code })
+
+         socketA.fire('disconnect')
+
+         expect(roomManager.getRoom(code).state.hostId).toBe('playerB')
+      })
+
+      it('broadcasts a player list on join and leave', () => {
+         socketA.fire('create-room')
+         const code = findSetup(socketA).payload.code
+         socketB.fire('join-room', { code, name: 'Joao' })
+
+         const list = playerListFor(code)
+         expect(list.command.players).toEqual([
+            { id: 'playerA', name: '', ready: false },
+            { id: 'playerB', name: 'Joao', ready: false },
+         ])
+      })
+
+      it('starts the game only when the host asks and all are ready', () => {
+         socketA.fire('create-room')
+         const code = findSetup(socketA).payload.code
+         socketB.fire('join-room', { code })
+
+         readyUp(socketB)
+         socketA.fire('start-game')
+         expect(roomManager.getRoom(code).state.started).toBe(false)
+
+         readyUp(socketA)
+         socketA.fire('start-game')
+         expect(roomManager.getRoom(code).state.started).toBe(true)
+         const start = broadcasts.find((b) => b.code === code && b.type === 'game-start')
+         expect(start).toBeDefined()
+         expect(start.command.state.started).toBe(true)
+         expect(start.command.state.hostId).toBe('playerA')
+      })
+
+      it('resets the game state when starting', () => {
+         socketA.fire('create-room')
+         const code = findSetup(socketA).payload.code
+         socketB.fire('join-room', { code })
+         readyUp(socketA)
+         readyUp(socketB)
+         roomManager.getRoom(code).state.coins['c1'] = { x: 1, y: 1 }
+         roomManager.getRoom(code).state.win = true
+
+         socketA.fire('start-game')
+
+         const game = roomManager.getRoom(code)
+         expect(game.state.win).toBe(false)
+         expect(game.state.coins['c1']).toBeUndefined()
+         expect(game.state.players['playerA']).toEqual({ x: 12, y: 0, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
+         expect(game.state.players['playerB']).toEqual({ x: 12, y: 0, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
+      })
+
+      it('requires every player to be ready before starting', () => {
+         socketA.fire('create-room')
+         const code = findSetup(socketA).payload.code
+         socketB.fire('join-room', { code })
+         readyUp(socketB)
+
+         socketA.fire('start-game')
+
+         expect(roomManager.getRoom(code).state.started).toBe(false)
+      })
+
+      it('resets readiness on start and end-game', () => {
+         socketA.fire('create-room')
+         const code = findSetup(socketA).payload.code
+         socketB.fire('join-room', { code })
+         readyUp(socketA)
+         readyUp(socketB)
+
+         socketA.fire('start-game')
+         expect(roomManager.getRoom(code).state.ready).toEqual({})
+
+         socketA.fire('end-game')
+         expect(roomManager.getRoom(code).state.started).toBe(false)
+         expect(roomManager.getRoom(code).state.ready).toEqual({ playerA: false, playerB: false })
+      })
+
+      it('tracks readiness per player in the lobby', () => {
+         socketA.fire('create-room')
+         const code = findSetup(socketA).payload.code
+         socketB.fire('join-room', { code })
+
+         readyUp(socketB)
+
+         const list = playerListFor(code)
+         expect(list.command.players.find(p => p.id === 'playerA').ready).toBe(false)
+         expect(list.command.players.find(p => p.id === 'playerB').ready).toBe(true)
+      })
+
+      it('returns the room to the lobby with end-game (host only)', () => {
+         socketA.fire('create-room')
+         const code = findSetup(socketA).payload.code
+         readyUp(socketA)
+         socketA.fire('start-game')
+         expect(roomManager.getRoom(code).state.started).toBe(true)
+
+         socketA.fire('end-game')
+
+         expect(roomManager.getRoom(code).state.started).toBe(false)
+         expect(broadcasts.find((b) => b.code === code && b.type === 'game-end')).toBeDefined()
+      })
+
+      it('kicks a player only when the host asks', () => {
+         socketA.fire('create-room')
+         const code = findSetup(socketA).payload.code
+         socketB.fire('join-room', { code })
+
+         socketB.fire('kick-player', { playerId: 'playerA' })
+         expect(roomManager.getRoom(code).state.players['playerA']).toBeDefined()
+
+         socketA.fire('kick-player', { playerId: 'playerB' })
+         expect(roomManager.getRoom(code).state.players['playerB']).toBeUndefined()
+         expect(broadcasts.find((b) => b.code === code && b.type === 'kicked')).toBeDefined()
+      })
+
+      it('lets players join a room even after the game started', () => {
+         socketA.fire('create-room')
+         const code = findSetup(socketA).payload.code
+         readyUp(socketA)
+         socketA.fire('start-game')
+
+         socketB.fire('join-room', { code })
+
+         expect(findSetup(socketB).payload.state.started).toBe(true)
+         expect(roomManager.getRoom(code).state.players['playerB']).toBeDefined()
+      })
+
+      it('ignores move-player for a player that left the game', () => {
+         socketA.fire('create-room')
+         const code = findSetup(socketA).payload.code
+
+         socketA.fire('leave-room')
+         expect(() => socketA.fire('move-player', { keyPressed: 'ArrowRight' })).not.toThrow()
+      })
+
+      it('ignores move-player while the room is in the lobby', () => {
+         socketA.fire('create-room')
+         const code = findSetup(socketA).payload.code
+
+         socketA.fire('move-player', { keyPressed: 'ArrowRight' })
+
+         expect(roomManager.getRoom(code).state.players['playerA'].x).toBe(12)
+      })
+
+      it('includes the map id in the player list', () => {
+         socketA.fire('create-room', { mode: 'online', map: 'world1' })
+         const code = findSetup(socketA).payload.code
+
+         expect(playerListFor(code).command.mapId).toBe('world1')
+      })
+
+      it('lets the host change the map in the lobby', () => {
+         socketA.fire('create-room', { mode: 'online' })
+         const code = findSetup(socketA).payload.code
+
+         socketA.fire('change-map', { map: 'world5' })
+
+         expect(roomManager.getRoom(code).state.mapId).toBe('world5')
+         expect(playerListFor(code).command.mapId).toBe('world5')
+      })
+
+      it('starts the game with the changed map', () => {
+         socketA.fire('create-room', { mode: 'online' })
+         const code = findSetup(socketA).payload.code
+         readyUp(socketA)
+
+         socketA.fire('change-map', { map: 'world1' })
+         socketA.fire('start-game')
+
+         const game = roomManager.getRoom(code)
+         expect(game.state.mapId).toBe('world1')
+         expect(game.state.screen).toEqual({ width: 50, height: 50 })
+         expect(game.state.players['playerA']).toMatchObject({ x: 25, y: 43 })
+      })
+
+      it('ignores change-map from non-host players', () => {
+         socketA.fire('create-room', { mode: 'online', map: 'world1' })
+         const code = findSetup(socketA).payload.code
+         socketB.fire('join-room', { code })
+
+         socketB.fire('change-map', { map: 'world5' })
+
+         expect(roomManager.getRoom(code).state.mapId).toBe('world1')
+      })
+
+      it('accepts any map id so custom maps can be used', () => {
+         socketA.fire('create-room', { mode: 'online' })
+         const code = findSetup(socketA).payload.code
+
+         socketA.fire('change-map', { map: 'custom-xyz' })
+
+         expect(roomManager.getRoom(code).state.mapId).toBe('custom-xyz')
+      })
+
+      it('creates a room with full map data for local maps', () => {
+         const mapData = {
+            name: 'Meu Mapa',
+            state: { screen: { width: 8, height: 8 }, players: {}, walls: { 0: { x: 1, y: 1 } } },
+            spawn: { x: 2, y: 2 },
+         }
+         socketA.fire('create-room', { mode: 'online', map: 'custom-local', mapData })
+
+         const setup = findSetup(socketA)
+         expect(setup.payload.state.screen).toEqual({ width: 8, height: 8 })
+         expect(setup.payload.state.spawn).toEqual({ x: 2, y: 2 })
+         expect(setup.payload.state.players['playerA']).toMatchObject({ x: 2, y: 2 })
+         expect(roomManager.getRoom(setup.payload.code).state.mapData).toEqual(mapData)
+      })
+
+      it('uses the room map data when the host changes to a local map', () => {
+         socketA.fire('create-room', { mode: 'online' })
+         const code = findSetup(socketA).payload.code
+         const mapData = {
+            name: 'Local',
+            state: { screen: { width: 6, height: 6 }, players: {}, walls: { 0: { x: 1, y: 1 } } },
+            spawn: { x: 3, y: 3 },
+         }
+
+         socketA.fire('change-map', { map: 'custom-local', mapData })
+
+         const preview = [...broadcasts].reverse().find((b) => b.code === code && b.type === 'map-preview')
+         expect(preview.command.map.state.screen).toEqual({ width: 6, height: 6 })
+         expect(roomManager.getRoom(code).state.mapData).toEqual(mapData)
+      })
+
+      it('restarts the game from the room map data', () => {
+         const mapData = {
+            name: 'Meu Mapa',
+            state: { screen: { width: 8, height: 8 }, players: {}, walls: { 0: { x: 1, y: 1 } } },
+            spawn: { x: 2, y: 2 },
+         }
+         socketA.fire('create-room', { mode: 'online', map: 'custom-local', mapData })
+         const code = findSetup(socketA).payload.code
+         readyUp(socketA)
+
+         socketA.fire('start-game')
+
+         const game = roomManager.getRoom(code)
+         expect(game.state.screen).toEqual({ width: 8, height: 8 })
+         expect(game.state.players['playerA']).toMatchObject({ x: 2, y: 2 })
+      })
+
+      it('broadcasts a map preview on create and on map change', () => {
+         socketA.fire('create-room', { mode: 'online' })
+         const code = findSetup(socketA).payload.code
+
+         const preview = broadcasts.find((b) => b.code === code && b.type === 'map-preview')
+         expect(preview).toBeDefined()
+         expect(preview.command.map.state.screen).toEqual({ width: 25, height: 25 })
+
+         socketA.fire('change-map', { map: 'world1' })
+         const updated = [...broadcasts].reverse().find((b) => b.code === code && b.type === 'map-preview')
+         expect(updated.command.map.state.screen).toEqual({ width: 50, height: 50 })
+      })
+
+      it('sends a map preview to players who join', () => {
+         socketA.fire('create-room', { mode: 'online' })
+         const code = findSetup(socketA).payload.code
+         socketA.fire('change-map', { map: 'world1' })
+
+         socketB.fire('join-room', { code })
+
+         const preview = socketB.emitted.find((e) => e.event === 'map-preview')
+         expect(preview).toBeDefined()
+         expect(preview.payload.map.state.screen).toEqual({ width: 50, height: 50 })
+      })
    })
 })

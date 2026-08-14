@@ -133,7 +133,7 @@ span.seta{
    display: none !important;
 }
 
-#login-screen{
+.screen{
    display: flex;
    flex-direction: column;
    align-items: center;
@@ -144,7 +144,7 @@ span.seta{
    padding: 40px;
 }
 
-#login-screen button{
+.screen button{
    padding: 12px 24px;
    font-size: 18px;
    border: none;
@@ -152,6 +152,51 @@ span.seta{
    background-color: rgb(55, 75, 51);
    color: white;
    cursor: pointer;
+}
+
+.screen h2{
+   text-transform: uppercase;
+   text-align: center;
+}
+
+#multi-error{
+   color: #7a1c1c;
+   min-height: 1em;
+}
+
+#lobby-players{
+   list-style: none;
+   min-width: 260px;
+   display: flex;
+   flex-direction: column;
+   gap: 8px;
+}
+
+#lobby-players li{
+   background-color: white;
+   color: black;
+   padding: 10px 14px;
+   border-radius: 5px;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   gap: 10px;
+   font-weight: bold;
+   text-transform: uppercase;
+}
+
+#lobby-players li button{
+   padding: 6px 10px;
+   font-size: 12px;
+   background-color: #7a1c1c;
+}
+
+#lobby-code{
+   background-color: rgba(0, 0, 0, 0.6);
+   color: white;
+   padding: 8px 12px;
+   border-radius: 6px;
+   text-transform: uppercase;
 }
 
 .login-join{
@@ -198,9 +243,160 @@ span.seta{
    background-color: white;
 }
 
-#leave-game{
+#lobby-preview{
+   width: 200px;
+   height: 200px;
+   min-width: 200px;
+   max-width: 200px;
+   border: 3px solid rgb(55, 75, 51);
+   border-radius: 5px;
+   background-color: white;
+}
+
+#lobby-players li span.ready-on{
+   color: #1c7a1c;
+}
+
+#lobby-players li button.ready-btn{
+   background-color: rgb(55, 75, 51);
+}
+
+#start-game:disabled{
+   opacity: 0.6;
+   cursor: not-allowed;
+}
+
+.editor-controls{
+   display: flex;
+   flex-direction: column;
+   gap: 12px;
+   align-items: center;
+   width: 100%;
+}
+
+.editor-controls input[type="text"]{
+   padding: 10px;
+   font-size: 20px;
+   text-align: center;
+   border: none;
+   border-radius: 5px;
+   width: 100%;
+}
+
+.editor-size{
+   display: flex;
+   flex-wrap: wrap;
+   gap: 8px;
+   align-items: center;
+   justify-content: center;
+}
+
+.editor-size label{
+   font-weight: bold;
+   text-transform: uppercase;
+   font-size: 14px;
+}
+
+.editor-size input{
+   padding: 6px;
+   width: 70px;
+   text-align: center;
+   border: none;
+   border-radius: 5px;
+   font-size: 16px;
+}
+
+#editor-load-select{
+   padding: 8px;
+   font-size: 15px;
+   text-align: center;
+   border: none;
+   border-radius: 5px;
+   max-width: 200px;
+   cursor: pointer;
+}
+
+.editor-main{
+   display: flex;
+   flex-direction: row;
+   flex-wrap: wrap;
+   gap: 15px;
+   align-items: flex-start;
+   justify-content: center;
+   width: 100%;
+}
+
+#editor-canvas{
+   width: auto;
+   max-width: 100%;
+   min-width: 0;
+   border: 3px solid rgb(55, 75, 51);
+   background-color: white;
+   touch-action: none;
+   cursor: crosshair;
+}
+
+.editor-palette{
+   display: grid;
+   grid-template-columns: repeat(2, minmax(90px, 1fr));
+   gap: 6px;
+   max-width: 230px;
+}
+
+.editor-palette button{
+   padding: 8px 6px;
+   font-size: 12px;
+   border: 2px solid transparent;
+   border-radius: 5px;
+   cursor: pointer;
+   font-weight: bold;
+   text-transform: uppercase;
+   color: black;
+}
+
+.editor-palette button.active{
+   border-color: rgb(55, 75, 51);
+   outline: 3px solid rgba(55, 75, 51, 0.4);
+}
+
+.editor-palette button[data-code="link"]{
+   color: white;
+}
+
+.editor-palette-wrap{
+   display: flex;
+   flex-direction: column;
+   gap: 8px;
+   max-width: 230px;
+}
+
+#editor-hint{
+   font-size: 12px;
+   text-transform: none;
+   color: #1d3a1d;
+}
+
+#editor-status{
+   min-height: 1.2em;
+}
+
+#end-game{
    position: fixed;
    top: 50px;
+   right: 15px;
+   z-index: 10;
+   background-color: rgb(55, 75, 51);
+   color: white;
+   border: none;
+   border-radius: 5px;
+   padding: 8px 14px;
+   cursor: pointer;
+   font-size: 16px;
+}
+
+#leave-game{
+   position: fixed;
+   top: 90px;
    right: 15px;
    z-index: 10;
    background-color: rgb(55, 75, 51);
@@ -216,11 +412,6 @@ span.seta{
    position: fixed;
    top: 50px;
    left: 15px;
-}
-
-#login-error{
-   color: #7a1c1c;
-   min-height: 1em;
 }
 
 #room-code-display{

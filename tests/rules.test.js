@@ -14,7 +14,6 @@ describe('createGame', () => {
   describe('initial state', () => {
     it('should have default values on creation', () => {
       const fresh = createGame()
-      expect(fresh.state.pontos).toBe(0)
       expect(fresh.state.mode).toBe('online')
       expect(fresh.state.screen).toEqual({})
       expect(fresh.state.players).toEqual({})
@@ -43,8 +42,8 @@ describe('createGame', () => {
 
   describe('setState', () => {
     it('should merge new state into existing state', () => {
-      game.setState({ pontos: 50 })
-      expect(game.state.pontos).toBe(50)
+      game.setState({ mode: 'single' })
+      expect(game.state.mode).toBe('single')
       expect(game.state.screen).toEqual({ width: 25, height: 25 })
     })
 
@@ -57,7 +56,7 @@ describe('createGame', () => {
   describe('addPlayer', () => {
     it('should add a player at specified coordinates', () => {
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 10 })
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 10, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 10, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should add a player at random coordinates when not specified', () => {
@@ -72,7 +71,7 @@ describe('createGame', () => {
 
     it('should add a player at x=0 when explicitly given', () => {
       game.addPlayer({ playerId: 'p1', playerX: 0, playerY: 0 })
-      expect(game.state.players['p1']).toEqual({ x: 0, y: 0, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 0, y: 0, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should allow multiple players', () => {
@@ -131,25 +130,25 @@ describe('createGame', () => {
     it('should move player right with ArrowRight', () => {
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should move player left with ArrowLeft', () => {
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowLeft' })
-      expect(game.state.players['p1']).toEqual({ x: 4, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 4, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should move player up with ArrowUp', () => {
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowUp' })
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 4, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 4, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should move player down with ArrowDown', () => {
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowDown' })
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 6, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 6, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should move in sequence', () => {
@@ -157,14 +156,14 @@ describe('createGame', () => {
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowDown' })
-      expect(game.state.players['p1']).toEqual({ x: 7, y: 6, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 7, y: 6, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should not affect other players when moving', () => {
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.addPlayer({ playerId: 'p2', playerX: 10, playerY: 10 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p2']).toEqual({ x: 10, y: 10, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p2']).toEqual({ x: 10, y: 10, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
   })
 
@@ -172,32 +171,32 @@ describe('createGame', () => {
     it('should not move player out of bounds (left)', () => {
       game.addPlayer({ playerId: 'p1', playerX: 0, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowLeft' })
-      expect(game.state.players['p1']).toEqual({ x: 0, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 0, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should not move player out of bounds (up)', () => {
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 0 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowUp' })
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 0, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 0, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should not move player out of bounds (right)', () => {
       game.addPlayer({ playerId: 'p1', playerX: 24, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 24, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 24, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should not move player out of bounds (down)', () => {
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 24 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowDown' })
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 24, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 24, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should enforce all bounds simultaneously', () => {
       game.addPlayer({ playerId: 'p1', playerX: 0, playerY: 0 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowUp' })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowLeft' })
-      expect(game.state.players['p1']).toEqual({ x: 0, y: 0, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 0, y: 0, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
   })
 
@@ -206,14 +205,14 @@ describe('createGame', () => {
       game.setState({ walls: { wall1: { x: 6, y: 5 } } })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should allow movement when no wall is in the way', () => {
       game.setState({ walls: { wall1: { x: 7, y: 5 } } })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should block with multiple walls but only at the right position', () => {
@@ -225,14 +224,14 @@ describe('createGame', () => {
       })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should allow diagonal-adjacent walls in other axes', () => {
       game.setState({ walls: { wall1: { x: 5, y: 6 } } })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
   })
 
@@ -241,14 +240,14 @@ describe('createGame', () => {
       game.setState({ boxes: { box1: { x: 7, y: 5 } } })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should push a box when the tile beyond is free', () => {
       game.setState({ boxes: { box1: { x: 6, y: 5 } } })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
       expect(game.state.boxes['box1']).toEqual({ x: 7, y: 5 })
     })
 
@@ -258,7 +257,7 @@ describe('createGame', () => {
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 8, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 8, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
       expect(game.state.boxes['box1']).toEqual({ x: 9, y: 5 })
     })
 
@@ -266,7 +265,7 @@ describe('createGame', () => {
       game.setState({ boxes: { box1: { x: 5, y: 6 } } })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowDown' })
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 6, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 6, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
       expect(game.state.boxes['box1']).toEqual({ x: 5, y: 7 })
     })
 
@@ -277,7 +276,7 @@ describe('createGame', () => {
       })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
       expect(game.state.boxes['box1']).toEqual({ x: 6, y: 5 })
     })
 
@@ -290,7 +289,7 @@ describe('createGame', () => {
       })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should block movement when a box cannot be pushed (door behind)', () => {
@@ -300,14 +299,14 @@ describe('createGame', () => {
       })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should not push a box out of bounds', () => {
       game.setState({ boxes: { box1: { x: 0, y: 5 } } })
       game.addPlayer({ playerId: 'p1', playerX: 1, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowLeft' })
-      expect(game.state.players['p1']).toEqual({ x: 1, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 1, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
       expect(game.state.boxes['box1']).toEqual({ x: 0, y: 5 })
     })
 
@@ -320,7 +319,7 @@ describe('createGame', () => {
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       expect(game.state.pits).toEqual({})
       expect(game.state.boxes).toEqual({})
-      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should allow walking over a filled pit', () => {
@@ -331,7 +330,7 @@ describe('createGame', () => {
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 7, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 7, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should slide a pushed box across ice with momentum', () => {
@@ -401,7 +400,7 @@ describe('createGame', () => {
       game.setState({ keydoor: { kd1: { x: 6, y: 5 } } })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
       expect(game.state.keydoor['kd1']).toEqual({ x: 6, y: 5 })
     })
 
@@ -414,9 +413,9 @@ describe('createGame', () => {
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       expect(game.state.inventory['p1']).toBe(1)
 
-      game.setState({ players: { p1: { x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0 } } })
+      game.setState({ players: { p1: { x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 } } })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
       expect(game.state.keydoor['kd1']).toBeUndefined()
       expect(game.state.inventory['p1']).toBe(0)
     })
@@ -438,7 +437,7 @@ describe('createGame', () => {
       game.setState({ coins: { coin1: { x: 6, y: 5 } } })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.pontos).toBe(1)
+      expect(game.state.players['p1'].pontos).toBe(1)
       expect(game.state.coins['coin1']).toEqual({ x: -1, y: -1 })
     })
 
@@ -452,7 +451,7 @@ describe('createGame', () => {
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowDown' })
-      expect(game.state.pontos).toBe(2)
+      expect(game.state.players['p1'].pontos).toBe(2)
     })
 
     it('should not affect other coins when collecting one', () => {
@@ -471,7 +470,7 @@ describe('createGame', () => {
       game.setState({ coins: { coin1: { x: 6, y: 5 } } })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 1 })
     })
   })
 
@@ -480,7 +479,7 @@ describe('createGame', () => {
       game.setState({ tp: { tp1: { x: 6, y: 5, destino: { x: 20, y: 20 } } } })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 20, y: 20, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 20, y: 20, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should not activate unrelated teleporters', () => {
@@ -492,14 +491,14 @@ describe('createGame', () => {
       })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 20, y: 20, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 20, y: 20, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should stop movement at the destination (does not continue)', () => {
       game.setState({ tp: { tp1: { x: 6, y: 5, destino: { x: 20, y: 20 } } } })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 20, y: 20, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 20, y: 20, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
   })
 
@@ -508,7 +507,7 @@ describe('createGame', () => {
       game.setState({ door: { door1: { x: 6, y: 5 } } })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should open a specific door when stepping on the corresponding plate', () => {
@@ -528,9 +527,9 @@ describe('createGame', () => {
       })
       game.addPlayer({ playerId: 'p1', playerX: 2, playerY: 3 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      game.setState({ players: { p1: { x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0 } } })
+      game.setState({ players: { p1: { x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 } } })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should not affect other doors when a plate is activated', () => {
@@ -638,7 +637,7 @@ describe('createGame', () => {
       expect(() => {
         game.movePlayer({ playerId: 'p1', keyPressed: 'UnknownKey' })
       }).not.toThrow()
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('should crash when moving a non-existent player (player is undefined)', () => {
@@ -650,7 +649,7 @@ describe('createGame', () => {
     it('destiny tile does not block movement', () => {
       game.addPlayer({ playerId: 'p1', playerX: 23, playerY: 24 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 24, y: 24, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 24, y: 24, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('reaching the destiny tile triggers a win', () => {
@@ -662,8 +661,8 @@ describe('createGame', () => {
 
     it('should return the state reference from the public API', () => {
       expect(game.state).toBeDefined()
-      game.state.pontos = 99
-      expect(game.state.pontos).toBe(99)
+      game.state.mode = 'single'
+      expect(game.state.mode).toBe('single')
     })
   })
 
@@ -694,7 +693,7 @@ describe('createGame', () => {
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.state.players['p1'].lives = 1
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 12, y: 0, lives: 3, stun: 0, invulnerable: 2 })
+      expect(game.state.players['p1']).toEqual({ x: 12, y: 0, lives: 3, stun: 0, invulnerable: 2, pontos: 0 })
     })
 
     it('triggers game over in single mode when lives run out', () => {
@@ -704,7 +703,7 @@ describe('createGame', () => {
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       expect(game.state.gameOver).toBe(true)
       expect(game.state.players['p1'].lives).toBe(0)
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 0, stun: 0, invulnerable: 2 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 0, stun: 0, invulnerable: 2, pontos: 0 })
     })
 
     it('blocks further movement after game over', () => {
@@ -714,7 +713,7 @@ describe('createGame', () => {
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       expect(game.state.gameOver).toBe(true)
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowDown' })
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 0, stun: 0, invulnerable: 2 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 0, stun: 0, invulnerable: 2, pontos: 0 })
     })
   })
 
@@ -723,7 +722,7 @@ describe('createGame', () => {
       game.setState({ spawn: { x: 12, y: 0 }, pits: { p1: { x: 6, y: 5 } } })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 12, y: 0, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 12, y: 0, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
   })
 
@@ -732,13 +731,13 @@ describe('createGame', () => {
       game.setState({ ice: { i1: { x: 6, y: 5 } } })
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
       game.tick()
-      expect(game.state.players['p1']).toEqual({ x: 7, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 7, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
       game.tick()
-      expect(game.state.players['p1']).toEqual({ x: 8, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 8, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
       game.tick()
-      expect(game.state.players['p1']).toEqual({ x: 8, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 8, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('stops sliding at a wall', () => {
@@ -746,7 +745,7 @@ describe('createGame', () => {
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       game.tick()
-      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('slides one tile per tick through a chain and carries momentum after it', () => {
@@ -754,13 +753,13 @@ describe('createGame', () => {
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       game.tick()
-      expect(game.state.players['p1']).toEqual({ x: 7, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 7, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
       game.tick()
-      expect(game.state.players['p1']).toEqual({ x: 8, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 8, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
       game.tick()
-      expect(game.state.players['p1']).toEqual({ x: 9, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 9, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
       game.tick()
-      expect(game.state.players['p1']).toEqual({ x: 9, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 9, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('stops sliding once the momentum runs out', () => {
@@ -770,7 +769,7 @@ describe('createGame', () => {
       game.tick()
       game.tick()
       game.tick()
-      expect(game.state.players['p1']).toEqual({ x: 8, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 8, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
   })
 
@@ -788,7 +787,7 @@ describe('createGame', () => {
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 2, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 6, y: 5, lives: 3, stun: 2, invulnerable: 0, pontos: 0 })
     })
 
     it('recovers after the stun expires', () => {
@@ -799,7 +798,7 @@ describe('createGame', () => {
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 7, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 7, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('a snare stops an ongoing ice slide', () => {
@@ -810,7 +809,7 @@ describe('createGame', () => {
       game.addPlayer({ playerId: 'p1', playerX: 5, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       game.tick()
-      expect(game.state.players['p1']).toEqual({ x: 7, y: 5, lives: 3, stun: 3, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 7, y: 5, lives: 3, stun: 3, invulnerable: 0, pontos: 0 })
       expect(game.state.snares['s1']).toBeUndefined()
     })
   })
@@ -820,7 +819,7 @@ describe('createGame', () => {
       game.setState({ darts: { d1: { x: 5, y: 5, direction: 'ArrowRight', range: 3 } } })
       game.addPlayer({ playerId: 'p1', playerX: 4, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('fires a projectile that travels and damages a player in its path', () => {
@@ -890,7 +889,7 @@ describe('createGame', () => {
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
       expect(game.state.bombs['b1']).toBeUndefined()
       expect(Object.keys(game.state.shockwaves)).toHaveLength(1)
-      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0 })
+      expect(game.state.players['p1']).toEqual({ x: 5, y: 5, lives: 3, stun: 0, invulnerable: 0, pontos: 0 })
     })
 
     it('shockwave damages the player as it expands', () => {
@@ -911,6 +910,7 @@ describe('createGame', () => {
       expect(game.state.players['p2'].lives).toBe(3)
       game.tick()
       expect(game.state.players['p2'].lives).toBe(2)
+      game.tick()
       expect(game.state.shockwaves).toEqual({})
     })
 
@@ -970,20 +970,24 @@ describe('createGame', () => {
       })
       game.addPlayer({ playerId: 'p1', playerX: 4, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(Object.values(game.state.shockwaves)[0].maxRadius).toBe(2)
+      expect(Object.values(game.state.shockwaves)[0].maxRadius).toBe(3)
       game.tick()
       expect(game.state.boxes['b1']).toBeUndefined()
     })
 
-    it('stops expanding when it reaches a wall', () => {
+    it('stops expanding when it reaches a wall but keeps going elsewhere', () => {
       game.setState({
         bombs: { b1: { x: 5, y: 5, radius: 3 } },
         walls: { w1: { x: 5, y: 8 } },
       })
       game.addPlayer({ playerId: 'p1', playerX: 4, playerY: 5 })
       game.movePlayer({ playerId: 'p1', keyPressed: 'ArrowRight' })
-      expect(Object.values(game.state.shockwaves)[0].maxRadius).toBe(2)
+      expect(Object.values(game.state.shockwaves)[0].maxRadius).toBe(3)
       game.tick()
+      game.tick()
+      game.tick()
+      expect(Object.values(game.state.shockwaves)[0].cells['5,8']).toBeUndefined()
+      expect(Object.values(game.state.shockwaves)[0].cells['2,5']).toBeDefined()
       game.tick()
       expect(game.state.shockwaves).toEqual({})
       expect(game.state.players['p1'].lives).toBe(2)
